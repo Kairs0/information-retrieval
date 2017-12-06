@@ -1,4 +1,5 @@
 import nltk
+import time
 from nltk.corpus import stopwords
 
 
@@ -23,20 +24,42 @@ def tokenize(cacm_file):
 
 
 def vocabulary(tokens, common_words_file):
+    words_filtered = []
     with open(common_words_file) as f:
         content_common = f.read()
 
-    stop_words = set(common_words_file.re)
+    commons_words_list = content_common.split("\n")
 
 
 
+    # https://pythonspot.com/en/nltk-stop-words/
+    stopwords = set(commons_words_list)
+
+    for w in tokens:
+    	if w not in stopwords:
+    		words_filtered.append(w)
+
+    return words_filtered
 
 
 if __name__ == "__main__":
-    tokens_result = tokenize("cacm.all")
 
+    start_time = time.time()
     # Question 1
-    print(len(tokenize("cacm.all")))
+    tokens_result = tokenize("cacm.all")
+    print("Number of tokens: ")
+    print(len(tokens_result))
+    t1 = time.time()
+    print("Result calculated in " + str(t1 - start_time) + " s")
 
     # Question 2
+    filtereds = vocabulary(tokens_result, "common_words")
+    print("Size of vocabulary: ")
+    print(len(filtereds))
+    t2 = time.time()
+    print("Result calculated in " + str(t2 - start_time) + " s")
+
+    # Question 3
+    # Generer nouveau ficher "semicacm.all" et effectuer le même traitement
+
 
