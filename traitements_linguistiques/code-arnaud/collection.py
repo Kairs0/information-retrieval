@@ -1,4 +1,4 @@
-from block import *
+from block import Block
 
 
 class Collection:
@@ -9,8 +9,8 @@ class Collection:
         self.blocks = []
         self.tokens = []
         self.vocabulary = []
-        with open(self.path) as f:
-            self.content = f.read()
+        with open(self.path) as file:
+            self.content = file.read()
 
     def calc_blocks(self):
         data = self.content.split("\n.")
@@ -26,8 +26,8 @@ class Collection:
             self.tokens += block.tokens
 
     def calc_vocabulary(self, common_words_file):
-        with open(common_words_file) as f:
-            content_common = f.read()
+        with open(common_words_file) as file:
+            content_common = file.read()
 
         common_words_list = content_common.split("\n")
         for block in self.blocks:

@@ -1,5 +1,5 @@
-from collection import *
 import time
+from collection import Collection
 
 if __name__ == "__main__":
     start_time = time.time()
@@ -40,5 +40,3 @@ if __name__ == "__main__":
     print(len(half_voc))
     t3 = time.time()
     print("Result calculated in " + str(round(t3 - start_time, 2)) + " s")
-
-

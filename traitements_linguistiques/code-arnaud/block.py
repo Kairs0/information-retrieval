@@ -26,7 +26,6 @@ class Block:
     def calc_vocabulary(self, common_words):
         stopwords = set(common_words)
 
-        for w in self.tokens:
-            if w not in stopwords:
-                self.vocabulary.append(w.lower())
-
+        for word in self.tokens:
+            if word not in stopwords:
+                self.vocabulary.append(word.lower())
