@@ -1,4 +1,4 @@
-import math, time
+import math, time, numpy as np, matplotlib.pyplot as plt
 from collection import Collection
 
 if __name__ == "__main__":
@@ -15,6 +15,7 @@ if __name__ == "__main__":
     print(len(tokens))
     t1 = time.time()
     print("Result calculated in " + str(round(t1 - start_time, 2)) + " s")
+    print("-------------------------------------------------\n")
 
     # Question 2
     print("Q2. Size of vocabulary: ")
@@ -23,6 +24,7 @@ if __name__ == "__main__":
     print(len(voc_coll))
     t2 = time.time()
     print("Result calculated in " + str(round(t2 - start_time, 2)) + " s")
+    print("-------------------------------------------------\n")
 
     # Question 3
     print("Q3. Nb of tokens and size of vocabulary for half the collection")
@@ -44,9 +46,29 @@ if __name__ == "__main__":
     print("K : ", k, " |  B : ", b)
     t3 = time.time()
     print("Result calculated in " + str(round(t3 - start_time, 2)) + " s")
+    print("-------------------------------------------------\n")
 
 
      # Question 4
     print("Q4. Estimation of the size of a one-million-tokens-collection's vocabulary")
     result = math.floor(k*(1000000**b))
     print("Result : ", result)
+    print("-------------------------------------------------\n")
+
+     # Question 5
+    print("Q5. Zipf Law : Graph Frequency vs Rank :")
+    token_occurency = {}
+    for token in map(str.lower, tokens):
+        if token in token_occurency:
+            token_occurency[token] = 1 + token_occurency[token]
+        else:
+            token_occurency[token] = 1
+    x = 1. / np.array(range(1, len(token_occurency)+1))
+    y = []
+    for value  in sorted(token_occurency.values(), reverse=True) :
+        y.append(value)
+    plt.plot(x,y)
+    plt.xlabel('1 / rank')
+    plt.ylabel('Occurency')
+    plt.show()
+    print("Conclude here")       
