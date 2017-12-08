@@ -30,6 +30,6 @@ class Collection:
             content_common = file.read()
 
         common_words_list = content_common.split("\n")
-        for block in self.blocks:
-            block.calc_vocabulary(common_words_list)
-            self.vocabulary = self.vocabulary | block.vocabulary
+        for token_lowered in set(map(str.lower, self.tokens)):
+            if token_lowered not in common_words_list:
+                self.vocabulary.add(token_lowered)

@@ -24,6 +24,9 @@ class Block:
         self.tokens = nltk.word_tokenize(self.clean_content)
 
     def calc_vocabulary(self, common_words):
+        """
+        Not used anymore
+        """
         stopwords = set(common_words)
 
         for word in self.tokens:
