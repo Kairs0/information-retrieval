@@ -1,4 +1,4 @@
-import time
+import math, time
 from collection import Collection
 
 if __name__ == "__main__":
@@ -32,11 +32,21 @@ if __name__ == "__main__":
     half_collection.blocks = half_collection.blocks[:index_half]
     half_collection.tokenize()
     half_collection.calc_vocabulary("common_words")
-    tokens_half = half_collection.tokens
+    half_tokens = half_collection.tokens
     half_voc = half_collection.vocabulary
-    print("Number of tokens:")
-    print(len(tokens_half))
-    print("Size of voc:")
+    print("Number of tokens (half-collection):")
+    print(len(half_tokens))
+    print("Size of voc (half-collection) :")
     print(len(half_voc))
+    b = math.log(len(voc_coll) / len(half_voc)) / \
+        math.log(len(tokens) / len(half_tokens))
+    k = len(voc_coll) / (len(tokens) ** b)
+    print("K : ", k, " |  B : ", b)
     t3 = time.time()
     print("Result calculated in " + str(round(t3 - start_time, 2)) + " s")
+
+
+     # Question 4
+    print("Q4. Estimation of the size of a one-million-tokens-collection's vocabulary")
+    result = math.floor(k*(1000000**b))
+    print("Result : ", result)
