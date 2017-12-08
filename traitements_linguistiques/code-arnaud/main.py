@@ -11,9 +11,10 @@ if __name__ == "__main__":
 
     # Question 1
     print("Q1. Number of tokens: ")
+    # print(tokens)
     print(len(tokens))
     t1 = time.time()
-    print("Result calculated in " + str(t1 - start_time) + " s")
+    print("Result calculated in " + str(round(t1 - start_time, 2)) + " s")
 
     # Question 2
     print("Q2. Size of vocabulary: ")
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     voc_coll = collection.vocabulary
     print(len(voc_coll))
     t2 = time.time()
-    print("Result calculated in " + str(t2 - start_time) + " s")
+    print("Result calculated in " + str(round(t2 - start_time, 2)) + " s")
 
     # Question 3
     print("Q3. Nb of tokens and size of vocabulary for half the collection")
@@ -38,6 +39,6 @@ if __name__ == "__main__":
     print("Size of voc:")
     print(len(half_voc))
     t3 = time.time()
-    print("Result calculated in " + str(t3 - start_time) + " s")
+    print("Result calculated in " + str(round(t3 - start_time, 2)) + " s")
 
 

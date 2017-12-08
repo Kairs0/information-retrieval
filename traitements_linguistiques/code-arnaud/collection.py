@@ -16,7 +16,7 @@ class Collection:
         data = self.content.split("\n.")
         for data_block in data:
             if data_block[0] == 'T' or data_block[0] == 'W' or data_block[0] == 'K':
-                new_block = Block(data_block[0], data_block)
+                new_block = Block(data_block[0], data_block[1:])
                 self.blocks.append(new_block)
 
     def tokenize(self):

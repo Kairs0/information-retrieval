@@ -16,7 +16,9 @@ class Block:
                 .replace(':', ' ')\
                 .replace('(', ' ')\
                 .replace(')', ' ')\
-
+                .replace('\'', ' ')\
+                .replace('[', ' ')\
+                .replace(']', ' ')
 
     def tokenize(self):
         self.tokens = nltk.word_tokenize(self.clean_content)
