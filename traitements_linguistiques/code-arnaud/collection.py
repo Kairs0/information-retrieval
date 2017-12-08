@@ -8,7 +8,7 @@ class Collection:
         self.path = path_file
         self.blocks = []
         self.tokens = []
-        self.vocabulary = []
+        self.vocabulary = set()
         with open(self.path) as file:
             self.content = file.read()
 
@@ -32,4 +32,4 @@ class Collection:
         common_words_list = content_common.split("\n")
         for block in self.blocks:
             block.calc_vocabulary(common_words_list)
-            self.vocabulary += block.vocabulary
+            self.vocabulary = self.vocabulary | block.vocabulary

@@ -8,7 +8,7 @@ class Block:
         self.content = content
         self.clean_content = ""
         self.tokens = []
-        self.vocabulary = []
+        self.vocabulary = set()
 
     def clean_words(self):
         self.clean_content = self.content.replace('.', ' ')\
@@ -28,4 +28,4 @@ class Block:
 
         for word in self.tokens:
             if word not in stopwords:
-                self.vocabulary.append(word.lower())
+                self.vocabulary.add(word.lower())
