@@ -8,6 +8,7 @@ class Collection:
         self.path = path_file
         self.blocks = []
         self.tokens = []
+        self.vocabulary = []
         with open(self.path) as f:
             self.content = f.read()
 
@@ -23,3 +24,12 @@ class Collection:
             block.clean_words()
             block.tokenize()
             self.tokens += block.tokens
+
+    def calc_vocabulary(self, common_words_file):
+        with open(common_words_file) as f:
+            content_common = f.read()
+
+        common_words_list = content_common.split("\n")
+        for block in self.blocks:
+            block.calc_vocabulary(common_words_list)
+            self.vocabulary += block.vocabulary
