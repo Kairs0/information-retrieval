@@ -74,6 +74,7 @@ if __name__ == "__main__":
     print("Graph frequency vs inverse rank")
     inverse_rank = 1. / np.array(range(1, len(token_occurrence) + 1))
     plt.xlabel('1 / Rank')
+    plt.ylabel('Occurrence')
     plt.plot(inverse_rank, occurrences)
     plt.show()
     print("Graph log(f) vs log(r)")
