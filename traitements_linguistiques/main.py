@@ -48,27 +48,44 @@ if __name__ == "__main__":
     print("Result calculated in " + str(round(t3 - start_time, 2)) + " s")
     print("-------------------------------------------------\n")
 
-
-     # Question 4
+    # Question 4
     print("Q4. Estimation of the size of a one-million-tokens-collection's vocabulary")
     result = math.floor(k*(1000000**b))
     print("Result : ", result)
     print("-------------------------------------------------\n")
 
-     # Question 5
+    # Question 5
     print("Q5. Zipf Law : Graph Frequency vs Rank :")
-    token_occurency = {}
+    token_occurrence = {}
     for token in map(str.lower, tokens):
-        if token in token_occurency:
-            token_occurency[token] = 1 + token_occurency[token]
+        if token in token_occurrence:
+            token_occurrence[token] += 1
         else:
-            token_occurency[token] = 1
-    x = 1. / np.array(range(1, len(token_occurency)+1))
-    y = []
-    for value  in sorted(token_occurency.values(), reverse=True) :
-        y.append(value)
-    plt.plot(x,y)
-    plt.xlabel('1 / rank')
-    plt.ylabel('Occurency')
+            token_occurrence[token] = 1
+
+    ranks = range(1, len(token_occurrence) + 1)
+    occurrences = []
+    for value in sorted(token_occurrence.values(), reverse=True):
+        occurrences.append(value)
+    plt.plot(ranks, occurrences)
+    plt.xlabel('Rank')
+    plt.ylabel('Occurrence')
     plt.show()
-    print("Conclude here")       
+    print("Graph frequency vs inverse rank")
+    inverse_rank = 1. / np.array(range(1, len(token_occurrence) + 1))
+    plt.xlabel('1 / Rank')
+    plt.plot(inverse_rank, occurrences)
+    plt.show()
+    print("Graph log(f) vs log(r)")
+    log_ranks = []
+    for rank_log_value in map(math.log, range(1, len(token_occurrence) + 1)):
+        log_ranks.append(rank_log_value)
+
+    log_freq = []
+    for value in sorted(token_occurrence.values(), reverse=True):
+        log_freq.append(math.log(value))
+
+    plt.plot(log_ranks, log_freq)
+    plt.xlabel('Log rank')
+    plt.ylabel('Log occurrence')
+    plt.show()
