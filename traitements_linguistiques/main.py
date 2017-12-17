@@ -1,4 +1,7 @@
-import math, time, numpy as np, matplotlib.pyplot as plt
+import math
+import time
+import numpy as np
+import matplotlib.pyplot as plt
 from collection import Collection
 
 if __name__ == "__main__":
@@ -70,11 +73,13 @@ if __name__ == "__main__":
     plt.plot(ranks, occurrences)
     plt.xlabel('Rank')
     plt.ylabel('Occurrence')
+    plt.title("Frequency vs Rank")
     plt.show()
     print("Graph frequency vs inverse rank")
     inverse_rank = 1. / np.array(range(1, len(token_occurrence) + 1))
     plt.xlabel('1 / Rank')
     plt.ylabel('Occurrence')
+    plt.title("Frequency vs inverse Rank")
     plt.plot(inverse_rank, occurrences)
     plt.show()
     print("Graph log(f) vs log(r)")
@@ -89,4 +94,5 @@ if __name__ == "__main__":
     plt.plot(log_ranks, log_freq)
     plt.xlabel('Log rank')
     plt.ylabel('Log occurrence')
+    plt.title("log frequency vs log Rank")
     plt.show()

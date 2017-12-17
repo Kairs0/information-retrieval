@@ -12,6 +12,8 @@ class Block:
 
     def clean_words(self):
         self.clean_content = self.content.replace('.', ' ')\
+                .replace('?', ' ') \
+                .replace('!', ' ') \
                 .replace(',', ' ')\
                 .replace(':', ' ')\
                 .replace('(', ' ')\
