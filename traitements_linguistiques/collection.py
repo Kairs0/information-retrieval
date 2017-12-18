@@ -3,7 +3,6 @@ from collections import defaultdict
 from document import Document
 
 
-
 class Collection:
 
     def __init__(self, path_file, title):
