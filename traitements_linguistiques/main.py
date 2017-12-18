@@ -9,6 +9,7 @@ if __name__ == "__main__":
 
     collection = Collection("cacm.all", "cacm")
     collection.calc_documents()
+    print(len(collection.documents))
     collection.tokenize()
     tokens = collection.tokens
 

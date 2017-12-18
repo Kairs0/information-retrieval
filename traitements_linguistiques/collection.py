@@ -25,16 +25,17 @@ class Collection:
             self.documents.append(new_doc)
 
     def tokenize(self):
-        for block in self.documents:
-            block.clean_words()
-            block.tokenize()
-            self.tokens += block.tokens
+        for document in self.documents:
+            document.clean_words()
+            document.tokenize()
 
     def calc_vocabulary(self, common_words_file):
         with open(common_words_file) as file:
             content_common = file.read()
 
         common_words_list = content_common.split("\n")
-        for token_lowered in set(map(str.lower, self.tokens)):
-            if token_lowered not in common_words_list:
-                self.vocabulary.add(token_lowered)
+        for document in self.documents:
+            for token_lowered in set(map(str.lower, document.tokens)):
+                if token_lowered not in common_words_list:
+                    self.vocabulary.add(token_lowered)
+                
