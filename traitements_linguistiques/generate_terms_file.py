@@ -4,7 +4,7 @@ import io
 if __name__ == "__main__":
     # Preparation pour construction index: extraction des tokens dans file
     collection = Collection("cacm.all", "cacm")
-    collection.calc_blocks()
+    collection.calc_documents()
     collection.tokenize()
     collection.calc_vocabulary("common_words")
     voc_coll = collection.vocabulary

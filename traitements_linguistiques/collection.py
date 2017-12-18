@@ -1,4 +1,4 @@
-from block import Block
+from document import Document
 
 
 class Collection:
@@ -6,21 +6,21 @@ class Collection:
     def __init__(self, path_file, title):
         self.title = title
         self.path = path_file
-        self.blocks = []
+        self.documents = []
         self.tokens = []
         self.vocabulary = set()
         with open(self.path) as file:
             self.content = file.read()
 
-    def calc_blocks(self):
+    def calc_documents(self):
         data = self.content.split("\n.")
-        for data_block in data:
-            if data_block[0] == 'T' or data_block[0] == 'W' or data_block[0] == 'K':
-                new_block = Block(data_block[0], data_block[1:])
-                self.blocks.append(new_block)
+        for data_doc in data:
+            if data_doc[0] == 'T' or data_doc[0] == 'W' or data_doc[0] == 'K':
+                new_doc = Document(data_doc[0], data_doc[1:])
+                self.documents.append(new_doc)
 
     def tokenize(self):
-        for block in self.blocks:
+        for block in self.documents:
             block.clean_words()
             block.tokenize()
             self.tokens += block.tokens

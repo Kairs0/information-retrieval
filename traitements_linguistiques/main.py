@@ -8,7 +8,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     collection = Collection("cacm.all", "cacm")
-    collection.calc_blocks()
+    collection.calc_documents()
     collection.tokenize()
     tokens = collection.tokens
 
@@ -32,9 +32,9 @@ if __name__ == "__main__":
     # Question 3
     print("Q3. Nb of tokens and size of vocabulary for half the collection")
     half_collection = Collection("cacm.all", "half-cacm")
-    half_collection.calc_blocks()
-    index_half = int(len(half_collection.blocks)/2)
-    half_collection.blocks = half_collection.blocks[:index_half]
+    half_collection.calc_documents()
+    index_half = int(len(half_collection.documents) / 2)
+    half_collection.documents = half_collection.documents[:index_half]
     half_collection.tokenize()
     half_collection.calc_vocabulary("common_words")
     half_tokens = half_collection.tokens
