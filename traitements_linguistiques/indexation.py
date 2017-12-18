@@ -1,6 +1,6 @@
 
 if __name__ == "__main__":
-    with open("../traitements_linguistiques/voc.txt") as file:
+    with open("voc.txt") as file:
         voc = file.read()
 
     terms = voc.split(" ")
