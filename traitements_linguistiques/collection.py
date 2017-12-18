@@ -28,8 +28,9 @@ class Collection:
 
     def create_posting_list(self):
         """
-
+        Optimisation Mathieu inspired
         """
+        
 
     # OLD    
     def tokenize(self):
