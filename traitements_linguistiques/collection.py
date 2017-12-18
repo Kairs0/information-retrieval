@@ -10,7 +10,6 @@ class Collection:
         self.title = title
         self.path = path_file
         self.documents = []
-        self.tokens = []
         self.vocabulary = set()
         with open(self.path) as file:
             self.content = file.read()
@@ -27,11 +26,18 @@ class Collection:
             new_doc = Document(doc_content)
             self.documents.append(new_doc)
 
+    def create_posting_list(self):
+        """
+
+        """
+
+    # OLD    
     def tokenize(self):
         for document in self.documents:
             document.clean_words()
             document.tokenize()
 
+    # OLD  
     def calc_vocabulary(self, common_words_file):
         with open(common_words_file) as file:
             content_common = file.read()
@@ -42,6 +48,7 @@ class Collection:
                 if token_lowered not in common_words_list:
                     self.vocabulary.add(token_lowered)
 
+    # OLD  
     def create_dict_term_termID(self):
         dic_term_termId = defaultdict(int)
         terms = self.vocabulary
@@ -50,3 +57,4 @@ class Collection:
         # generate json file
         with open("dic_terms.json", 'w') as json_file:
             json.dump(dic_term_termId, json_file)
+
