@@ -25,4 +25,6 @@ class Document:
                 .replace(']', ' ')
 
     def tokenize(self):
-        self.tokens = nltk.word_tokenize(self.clean_content)
+        tokens = nltk.word_tokenize(self.clean_content)
+        for tok in map(str.lower, tokens):
+            self.tokens.append(tok)

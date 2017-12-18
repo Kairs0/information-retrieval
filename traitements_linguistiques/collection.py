@@ -4,7 +4,6 @@ from collections import defaultdict
 from document import Document
 
 
-
 class Collection:
     
     stemmer = SnowballStemmer("english")
