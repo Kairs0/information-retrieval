@@ -9,9 +9,10 @@ if __name__ == "__main__":
 
     collection = Collection("cacm.all", "cacm")
     collection.calc_documents()
-    print(len(collection.documents))
     collection.tokenize()
-    tokens = collection.tokens
+    tokens = []
+    for document in collection.documents:
+        tokens += document.tokens
 
     # Question 1
     print("Q1. Number of tokens: ")
@@ -38,7 +39,9 @@ if __name__ == "__main__":
     half_collection.documents = half_collection.documents[:index_half]
     half_collection.tokenize()
     half_collection.calc_vocabulary("common_words")
-    half_tokens = half_collection.tokens
+    half_tokens = []
+    for doc in half_collection.documents:
+        half_tokens += doc.tokens
     half_voc = half_collection.vocabulary
     print("Number of tokens (half-collection):")
     print(len(half_tokens))
