@@ -1,4 +1,7 @@
+import json
+from collections import defaultdict
 from document import Document
+
 
 
 class Collection:
@@ -38,4 +41,12 @@ class Collection:
             for token_lowered in set(map(str.lower, document.tokens)):
                 if token_lowered not in common_words_list:
                     self.vocabulary.add(token_lowered)
-                
+
+    def create_dict_term_termID(self):
+        dic_term_termId = defaultdict(int)
+        terms = self.vocabulary
+        for i, term in enumerate(terms):
+            dic_term_termId[term] = i
+        # generate json file
+        with open("dic_terms.json", 'w') as json_file:
+            json.dump(dic_term_termId, json_file)
