@@ -1,10 +1,13 @@
 import json
+from nltk.stem import SnowballStemmer
 from collections import defaultdict
 from document import Document
 
 
 
 class Collection:
+    
+    stemmer = SnowballStemmer("english")
 
     def __init__(self, path_file, title):
         self.title = title
@@ -30,7 +33,25 @@ class Collection:
         """
         Optimisation Mathieu inspired
         """
+        with open("common_words") as file:
+            content_common = file.read()
+        common_words_list = content_common.split("\n")
+
+        dict_term_termID = defaultdict(int)
+        posting_list = defaultdict(list)
+        j = 0
+
+        for document in self.documents:
+            for token in document.tokens:
+                stemmed_word = self.stemmer.stem(token)
+                if stemmed_word in common_words_list:
+                    continue
+                if stemmed_word not in dict_term_termID:
+                    dict_term_termID[stemmed_word] = j
+                    j += 1
+                posting_list[j].append(document.id)
         
+        return posting_list, sorted(dict_term_termID.items(), key= lambda x:x[0])            
 
     # OLD    
     def tokenize(self):
