@@ -25,6 +25,7 @@ class Collection:
             self.documents.append(new_doc)
 
     def tokenize(self):
+        
         for block in self.documents:
             block.clean_words()
             block.tokenize()
