@@ -13,11 +13,16 @@ class Collection:
             self.content = file.read()
 
     def calc_documents(self):
-        data = self.content.split("\n.")
-        for data_doc in data:
-            if data_doc[0] == 'T' or data_doc[0] == 'W' or data_doc[0] == 'K':
-                new_doc = Document(data_doc[0], data_doc[1:])
-                self.documents.append(new_doc)
+        documents = self.content.split("\n.I")
+
+        for document in documents:
+            blocks = document.split("\n.")
+            doc_content = ""
+            for block in blocks:
+                if block[0] == 'T' or block[0] == 'W' or block[0] == 'K':
+                    doc_content += block[1:]
+            new_doc = Document(doc_content)
+            self.documents.append(new_doc)
 
     def tokenize(self):
         for block in self.documents:

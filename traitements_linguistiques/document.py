@@ -4,9 +4,8 @@ import nltk
 class Document:
     incremental_id = 0
 
-    def __init__(self, type_block, content):
+    def __init__(self, content):
         self.id = Document.incremental_id
-        self.type_block = type_block
         self.content = content
         self.clean_content = ""
         self.tokens = []
