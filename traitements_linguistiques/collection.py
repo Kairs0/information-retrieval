@@ -36,7 +36,7 @@ class Collection:
             content_common = file.read()
         common_words_list = content_common.split("\n")
 
-        dict_term_termID = defaultdict(int)
+        dictionary = defaultdict(int)
         posting_list = defaultdict(list)
         j = 0
 
@@ -45,12 +45,12 @@ class Collection:
                 stemmed_word = self.stemmer.stem(token)
                 if stemmed_word in common_words_list:
                     continue
-                if stemmed_word not in dict_term_termID:
-                    dict_term_termID[stemmed_word] = j
+                if stemmed_word not in dictionary:
+                    dictionary[stemmed_word] = j
                     j += 1
-                posting_list[j].append(document.id)
+                posting_list[j].append(int(document.id))
         
-        return posting_list, OrderedDict(sorted(dict_term_termID.items(), key= lambda x:x[0]))            
+        return posting_list, OrderedDict(sorted(dictionary.items(), key= lambda x:x[0]))            
     
     def create_docID_index(self, posting_list, dictionary):
         docID_index = defaultdict(list)
@@ -76,7 +76,7 @@ class Collection:
                     self.vocabulary.add(token_lowered)
 
     # OLD  
-    def create_dict_term_termID(self):
+    def create_dictionary(self):
         dic_term_termId = defaultdict(int)
         terms = self.vocabulary
         for i, term in enumerate(terms):
