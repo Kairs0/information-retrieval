@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     with open("dic_terms.json", 'w') as json_terms:
         json.dump(dictionary, json_terms)
-    
+
     with open("docID_index.json", 'w') as json_index:
         json.dump(docID_index, json_index)
 
