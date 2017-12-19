@@ -1,6 +1,6 @@
 import json
 from nltk.stem import SnowballStemmer
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from document import Document
 
 
@@ -50,7 +50,13 @@ class Collection:
                     j += 1
                 posting_list[j].append(document.id)
         
-        return posting_list, sorted(dict_term_termID.items(), key= lambda x:x[0])            
+        return posting_list, OrderedDict(sorted(dict_term_termID.items(), key= lambda x:x[0]))            
+    
+    def create_docID_index(self, posting_list, dictionary):
+        docID_index = defaultdict(list)
+        for termID in dictionary.values():
+            docID_index[termID] = list(set(posting_list[termID]))
+        return docID_index
 
     # OLD    
     def tokenize(self):
