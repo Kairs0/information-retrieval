@@ -20,7 +20,7 @@ if __name__ == "__main__":
     docID_index_with_frequency = collection.create_docID_index_with_frequency(posting_list, dictionary)
     print("InverseIndex w/ freq created : " + str(time.time() - start_time))
     
-    docID_weight = collection.create_docID_weight(docID_index_with_frequency, dictionary)
+    docID_weight = collection.create_docID_weight(docID_index, dictionary)
     print("Doc Weight table created : " + str(time.time() - start_time))
 
 

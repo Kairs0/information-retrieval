@@ -53,7 +53,7 @@ class Collection:
                     j += 1
                 else:
                     termID = dictionary[stemmed_word]
-                document.vocabulary.add(stemmed_word)
+                document.vocabulary.append(stemmed_word)
                 posting_list[termID].append(int(document.id))
         
         return posting_list, OrderedDict(sorted(dictionary.items(), key= lambda x:x[0]))            
@@ -70,15 +70,13 @@ class Collection:
             docID_index_with_frequency[termID] = list(Counter(posting_list[termID]).items())
         return docID_index_with_frequency
 
-    def create_docID_weight(self, docID_index_with_frequency, dictionary):
+    def create_docID_weight(self, docID_index, dictionary):
         docID_weight = defaultdict(float)
         for document in self.documents:
             total_doc_weight = 0 
-            for term in document.vocabulary:
+            for term, freq in Counter(document.vocabulary).items():
                 termID = dictionary[term]
-                posting_list = Counter({i[0] : i[1] for i in docID_index_with_frequency[termID]})
-                #import pdb; pdb.set_trace()
-                total_doc_weight += posting_list[document.id]*len(self.documents)/len(posting_list)
+                total_doc_weight += freq*len(self.documents)/len(docID_index[termID])
             docID_weight[document.id] = total_doc_weight
 
         return docID_weight

@@ -9,7 +9,7 @@ class Document:
         self.content = content
         self.clean_content = ""
         self.tokens = []
-        self.vocabulary = set()
+        self.vocabulary = [] # On garde volontairement les doublons
         Document.incremental_id += 1
 
     def clean_words(self):

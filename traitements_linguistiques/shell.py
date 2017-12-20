@@ -60,7 +60,7 @@ if __name__ == "__main__":
         else:
             assert False, "unhandled option"
 
-    if (search_type == None or query == None):
+    if (search_type is None or query is None):
         print_usage()
         sys.exit(2)
 
