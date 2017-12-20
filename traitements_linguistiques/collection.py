@@ -1,6 +1,6 @@
 import json
 from nltk.stem import SnowballStemmer
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, OrderedDict, Counter
 from document import Document
 
 
@@ -45,18 +45,44 @@ class Collection:
                 stemmed_word = self.stemmer.stem(token)
                 if stemmed_word in common_words_list:
                     continue
+                if len(stemmed_word) == 1:
+                    continue
                 if stemmed_word not in dictionary:
-                    dictionary[stemmed_word] = j
+                    termID = j
+                    dictionary[stemmed_word] = termID
                     j += 1
-                posting_list[j].append(int(document.id))
+                else:
+                    termID = dictionary[stemmed_word]
+                document.vocabulary.add(stemmed_word)
+                posting_list[termID].append(int(document.id))
         
         return posting_list, OrderedDict(sorted(dictionary.items(), key= lambda x:x[0]))            
-    
+
     def create_docID_index(self, posting_list, dictionary):
         docID_index = defaultdict(list)
         for termID in dictionary.values():
             docID_index[termID] = list(set(posting_list[termID]))
         return docID_index
+
+    def create_docID_index_with_frequency(self, posting_list, dictionary):
+        docID_index_with_frequency = defaultdict(list)
+        for termID in dictionary.values():
+            docID_index_with_frequency[termID] = list(Counter(posting_list[termID]).items())
+        return docID_index_with_frequency
+
+    def create_docID_weight(self, docID_index_with_frequency, dictionary):
+        docID_weight = defaultdict(float)
+        for document in self.documents:
+            total_doc_weight = 0 
+            for term in document.vocabulary:
+                termID = dictionary[term]
+                posting_list = Counter({i[0] : i[1] for i in docID_index_with_frequency[termID]})
+                #import pdb; pdb.set_trace()
+                total_doc_weight += posting_list[document.id]*len(self.documents)/len(posting_list)
+            docID_weight[document.id] = total_doc_weight
+
+        return docID_weight
+
 
     # OLD    
     def tokenize(self):
