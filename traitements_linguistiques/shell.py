@@ -16,24 +16,13 @@ def print_usage():
     print("-t\t\t: enable the time record.")
     print("-r --request\t: request (main argument).")
 
+def research(search_type,query):
+    if search_type == 'b' or search_type == "boolean":
+        return boolean_research.process_query(query, dictionary, inverse_index_simple, doc_id_list)
+    elif search_type == 'v' or search_type == "vector":
+        return vector_research.process_query(query, dictionary, inverse_index_freq, list_doc_weight)
 
 if __name__ == "__main__":
-    with open("dic_terms.json", "r") as f:
-        dictionary = json.load(f)
-
-    with open("docID_index.json", "r") as f2:
-        docID_index = json.load(f2)
-
-    with open("docID_index_with_freq.json", "r") as f3:
-        docID_index_with_frequency = json.load(f3)
-
-    with open("docID_weight.json", "r") as f4:
-        docID_weight = json.load(f4)
-
-    docID_list = set()
-    for docID_term_list in docID_index.values():
-        for docID in docID_term_list:
-            docID_list.add(docID)
 
     RECORD_TIME = False
     search_type = None
@@ -60,19 +49,41 @@ if __name__ == "__main__":
         else:
             assert False, "unhandled option"
 
-    if (search_type is None or query is None):
+    if (search_type is None):
         print_usage()
         sys.exit(2)
 
-    if (RECORD_TIME):
-        start = timeit.default_timer()                                          # start time
+    shell_open = True
+    print("Loading indexes...", end="")
 
-    if search_type == 'b' or search_type == "boolean":                          # do the research
-        print(boolean_research.process_query(query, dictionary, docID_index, docID_list))
-    elif search_type == 'v' or search_type == "vector":
-        print(vector_research.process_query(query, dictionary, docID_index_with_frequency, docID_weight))
+    with open("dictionary.json", "r") as f:
+        dictionary = json.load(f)
 
-    if (RECORD_TIME):
-        stop = timeit.default_timer()                                           # stop time
-    if (RECORD_TIME):
-        print('Indexing time:' + str(stop - start))                            # print time taken
+    with open("inverse_index_simple.json", "r") as f2:
+        inverse_index_simple = json.load(f2)
+
+    with open("inverse_index_freq.json", "r") as f3:
+        inverse_index_freq = json.load(f3)
+
+    with open("list_doc_weight.json", "r") as f4:
+        list_doc_weight = json.load(f4)
+
+    doc_id_list = list_doc_weight.keys()
+
+    print(" => Indexes loaded.")
+    
+
+    while shell_open:
+        str_query = input(">> ")
+        if str_query == "exit()":
+            shell_open = False
+        else:
+            if (RECORD_TIME):
+                start = timeit.default_timer()                                      # start time
+
+            print(research(search_type, str_query))
+
+            if (RECORD_TIME):
+                stop = timeit.default_timer()                                       # stop time
+            if (RECORD_TIME):
+                print('Query time: ' + str(stop - start))      # print time taken

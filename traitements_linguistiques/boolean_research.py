@@ -1,18 +1,14 @@
 """
 TO-DO
 """
-import json, math
 from collections import deque, OrderedDict, defaultdict
 import nltk
-
-DICTIONARY = OrderedDict()
-DOCID_INDEX = defaultdict(set)
 
 def simple_request(term):
     try:
         if type(term) is list:
             return term
-        #import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         return DOCID_INDEX[str(DICTIONARY[term])]
     except KeyError:
         return list()
@@ -29,7 +25,7 @@ def process_query(query, dictionary, docID_index, docID_list):
     indexed_docIDs: the list of all docIDs indexed (used for negations)
     """
     global DICTIONARY
-    DICTIONARY = dictionary
+    DICTIONARY = OrderedDict(dictionary)
     global DOCID_INDEX
     DOCID_INDEX = docID_index
 
@@ -49,6 +45,7 @@ def process_query(query, dictionary, docID_index, docID_list):
         if (token != 'AND' and token != 'OR' and token != 'NOT'):
             token = stemmer.stem(token) # stem the token
             # default empty list if not in dictionary
+            # import pdb; pdb.set_trace()
             if (token in dictionary): 
                 result = simple_request(token)
         
@@ -80,7 +77,7 @@ def process_query(query, dictionary, docID_index, docID_list):
     if len(results_stack) != 1: 
         print ("ERROR: results_stack. Please check valid query") # check for errors
     
-    return results_stack.pop()
+    return sorted(results_stack.pop())
 
 
 def shunting_yard(infix_tokens):
