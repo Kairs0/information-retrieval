@@ -1,19 +1,18 @@
 import json
-from collection import Collection
 import time
+from collection import Collection
 
 if __name__ == "__main__":
     start_time = time.time()
     collection = Collection(r'.\collection_data\CACM\cacm.all', "cacm")
     block = collection.create_block()
     block.get_documents()
-    block.tokenize()
     print("Tokenisation done : " + str(time.time() - start_time))
 
     posting_list, dictionary = block.create_posting_list()
     # import pdb; pdb.set_trace()
     print("Dictionary + Posting List created : " + str(time.time() - start_time))
-
+    
     docID_index = block.create_docID_index(posting_list)
     print("Simple InverseIndex created : " + str(time.time() - start_time))
     

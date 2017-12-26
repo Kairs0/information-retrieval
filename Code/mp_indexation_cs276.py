@@ -2,55 +2,61 @@ import gc
 import time
 import io
 from collections import defaultdict
+from multiprocessing import Manager
 import ujson
 import ijson
 from collection import Collection
 
-if __name__ == "__main__":
-    ##############################################
-    n = 1 # Nombre de bloc sur lequel on travaille.
-    ##############################################
+PATH = r'.\collection_data\CS276\pa1-data'
+
+def create_blocks(n):
     if not gc.isenabled():
         gc.enable()
     start_time = time.time()
-    PATH = r'.\collection_data\CS276\pa1-data'
 
     print("Initialing the CS276 Collection ... ", end='')
     collection = Collection(PATH, "cs276")
-    print("Done")
+    print("[Done]")
+    manager = Manager()
     inter_time = time.time()
 
-    with open(f'{PATH}\doc_index.json', 'w') as doc_index:
-        for block_id in range(n):
-            block = collection.create_block(block_id)
-            print(f"Block {block_id} created. ", end='\n\t')
-            block.get_documents()
-            print("Documents loaded : " + str(time.time() - inter_time), end='\n\t')
-            inter_time = time.time()
+    with open(f'{PATH}\doc_index.json', 'wb') as doc_index_file:
+        doc_index_file.write(b'{')
 
+        for block_id in range(n):
+            block = collection.create_mpblock(block_id, manager)
+            print(f"Block {block_id}: ", end='\n\t')
+
+            print("Posting List creation ... ", end='')
             block.create_posting_list()
-            print("Posting List created : " + str(time.time() - inter_time), end='\n\t')
+            print("[DONE] : " + str(time.time() - inter_time), end='\n\t')
             inter_time = time.time()
 
             with open(f'{PATH}\posting_list_block{block_id}.json', 'w') as json_index:
                 ujson.dump(block.posting_list, json_index)
 
-            ujson.dump({doc.name: doc.doc_id for doc in block.documents}, doc_index)
+            doc_index = {doc.filename: doc.doc_id for doc in block.documents}
+            doc_index_file.write(bytes(ujson.dumps(doc_index), 'utf8')[1:-1] + b',')
 
             del block
             gc.collect()
             print(f"Json written, memory released: {block_id}"+ str(time.time() - inter_time))
             inter_time = time.time()
 
+        doc_index_file.seek(-1, 2)
+        doc_index_file.write(b'}')
+
     with open(f'{PATH}\dictionary.json', 'w') as json_index:
         ujson.dump(collection.dictionary, json_index)
-    del collection
-    gc.collect()
+
     print(f"All blocks indexed: "+ str(time.time() - start_time))
     inter_time = time.time()
+    del collection
+    manager.shutdown()
+    gc.collect()
 
-    import pdb; pdb.set_trace()
-    # Do the merging here !
+def merge_blocks_on_disk():
+    start_time = time.time()
     with \
         open(f'{PATH}\posting_list_block0.json', mode='rb') as pl0,\
         open(f'{PATH}\posting_list_block1.json', mode='rb') as pl1, \
@@ -69,9 +75,9 @@ if __name__ == "__main__":
         # We init plc_file
         plc_file.write(b'{')
 
-        print(f"Every file stream opened and initialized"+ str(time.time() - inter_time), end='\n\t')
+        print(f"Every file stream opened and initialized"+ str(time.time() - start_time), end='\n\t')
         inter_time = time.time()
-        
+
         plc = defaultdict(dict)
         # import pdb; pdb.set_trace()
         while parser_list:
@@ -80,7 +86,7 @@ if __name__ == "__main__":
             while buff < 4 * 1024:
                 # While buff is not full, do:
                 # We process the smallest keys
-                min_key = min(list(map(int,curr_keys.values())))
+                min_key = min(list(map(int, curr_keys.values())))
                 parser_to_del = []
                 for parser in parser_list:
                     if curr_keys[parser] == str(min_key):
@@ -102,7 +108,7 @@ if __name__ == "__main__":
                         try:
                             plc[min_key] = {**plc[min_key], **curr_pl}
                         except KeyError:
-                            plc[min_key] = curr_pl                       
+                            plc[min_key] = curr_pl
                 # We increment the writing buffer
                 buff += 1
                 # We clean the parser list
@@ -113,12 +119,13 @@ if __name__ == "__main__":
                     break
             # We write on the disk the current processed keys
             # import pdb; pdb.set_trace()
-            plc_file.write(bytes(ujson.dumps(plc), 'utf8')[1:-1] + b',') # Attention on ne veut écrire qu'un seul dico >>.<<
-            print(f'Posting List (term_id <= {min_key}) written on disk: ' + str(time.time() - inter_time), end='\n\t')
+            plc_file.write(bytes(ujson.dumps(plc), 'utf8')[1:-1] + b',')
+            print(f'Posting List (term_id <= {min_key}) written on disk: '\
+                + str(time.time() - inter_time), end='\n\t')
             inter_time = time.time()
             plc = defaultdict(dict)
 
-        plc_file.seek(-1,2)
+        plc_file.seek(-1, 2)
         plc_file.write(b'}')
         print(f'[DONE] '+ str(time.time() - inter_time))
         inter_time = time.time()
@@ -127,4 +134,11 @@ if __name__ == "__main__":
     end_time = time.time()
     print("Result calculated in " + str(round(end_time - start_time, 2)) + " s")
 
+if __name__ == "__main__":
+    ##############################################
+    n = 2 # Nombre de bloc sur lequel on travaille.
+    ##############################################
+    create_blocks(n)
+
+    # merge_blocks_on_disk()
     # import pdb; pdb.set_trace()
