@@ -1,14 +1,15 @@
 """
 Source : https://pymotw.com/2/multiprocessing/mapreduce.html
+Double reduce function
 """
 import collections
 import itertools
 import multiprocessing
 
 
-class SimpleMapReduce(object):
+class MapDoubleReduce(object):
 
-    def __init__(self, map_func, reduce_func, num_workers=None):
+    def __init__(self, map_func, reduce_func_1, reduce_func_2, num_workers=None):
         """
         map_func
 
@@ -16,7 +17,7 @@ class SimpleMapReduce(object):
           argument one input value and returns a tuple with the key
           and a value to be reduced.
 
-        reduce_func
+        reduce_func_1 & 2
 
           Function to reduce partitioned version of intermediate data
           to final output. Takes as argument a key as produced by
@@ -29,16 +30,26 @@ class SimpleMapReduce(object):
           number of CPUs available on the current host.
         """
         self.map_func = map_func
-        self.reduce_func = reduce_func
+        self.reduce_func_1 = reduce_func_1
+        self.reduce_func_2 = reduce_func_2
         self.pool = multiprocessing.Pool(num_workers)
 
-    def partition(self, mapped_values):
+    def partition_1(self, mapped_values):
         """Organize the mapped values by their key.
         Returns an unsorted sequence of tuples with a key and a sequence of values.
         """
         partitioned_data = collections.defaultdict(list)
         for key, value in mapped_values:
             partitioned_data[key].append(value)
+        return partitioned_data.items()
+
+    def partition_2(self, mapped_values):
+        """Organize the mapped values by their value.
+        Returns an unsorted sequence of tuples with a key and a sequence of values.
+        """
+        partitioned_data = collections.defaultdict(list)
+        for key, value in mapped_values:
+            partitioned_data[value].append(key)
         return partitioned_data.items()
 
     def __call__(self, inputs, chunksize=1):
@@ -53,8 +64,10 @@ class SimpleMapReduce(object):
         """
         map_responses = self.pool.map(
             self.map_func, inputs, chunksize=chunksize)
-        partitioned_data = self.partition(itertools.chain(*map_responses))
-        reduced_values = self.pool.map(self.reduce_func, partitioned_data)
+        partitioned_data_1 = self.partition_1(itertools.chain(*map_responses))
+        reduced_values_1 = self.pool.map(self.reduce_func_1, partitioned_data_1)
+
+        partitioned_data_2 = self.partition_2(itertools.chain(*map_responses))
+        reduced_values_2 = self.pool.map(self.reduce_func_2, partitioned_data_2)
         self.pool.close()
-        self.pool.join()
-        return reduced_values
+        return reduced_values_1, reduced_values_2

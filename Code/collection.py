@@ -1,4 +1,3 @@
-from collections import defaultdict
 from nltk.stem import SnowballStemmer
 
 class Collection:
@@ -10,7 +9,7 @@ class Collection:
         self.path = path
         self.blocks = []
 
-        self.dictionary = defaultdict(int)
+        self.dictionary = {}
         self.doc_id_offset = 0
 
         with open(r'.\collection_data\CACM\common_words') as file:

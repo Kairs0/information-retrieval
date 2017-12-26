@@ -20,8 +20,11 @@ def create_blocks(n):
     manager = Manager()
     inter_time = time.time()
 
-    with open(f'{PATH}\doc_index.json', 'wb') as doc_index_file:
+    with \
+        open(f'{PATH}\doc_index.json', 'wb') as doc_index_file,\
+        open(f'{PATH}\doc_vecs.json', 'wb') as doc_vecs_file:
         doc_index_file.write(b'{')
+        doc_vecs_file.write(b'{')
 
         for block_id in range(n):
             block = collection.create_mpblock(block_id, manager)
@@ -35,16 +38,21 @@ def create_blocks(n):
             with open(f'{PATH}\posting_list_block{block_id}.json', 'w') as json_index:
                 ujson.dump(block.posting_list, json_index)
 
-            doc_index = {doc.filename: doc.doc_id for doc in block.documents}
+            doc_index = {doc.filename: doc.doc_id for doc in sorted(block.documents, key=lambda x: x.doc_id)}
             doc_index_file.write(bytes(ujson.dumps(doc_index), 'utf8')[1:-1] + b',')
+
+            doc_vecs = {doc.doc_id: doc.vector for doc in sorted(block.documents, key=lambda x: x.doc_id)}
+            doc_vecs_file.write(bytes(ujson.dumps(doc_vecs), 'utf8')[1:-1] + b',')
 
             del block
             gc.collect()
-            print(f"Json written, memory released: {block_id}"+ str(time.time() - inter_time))
+            print(f"Json written, memory released: "+ str(time.time() - inter_time))
             inter_time = time.time()
 
         doc_index_file.seek(-1, 2)
         doc_index_file.write(b'}')
+        doc_vecs_file.seek(-1, 2)
+        doc_vecs_file.write(b'}')
 
     with open(f'{PATH}\dictionary.json', 'w') as json_index:
         ujson.dump(collection.dictionary, json_index)
@@ -75,7 +83,7 @@ def merge_blocks_on_disk():
         # We init plc_file
         plc_file.write(b'{')
 
-        print(f"Every file stream opened and initialized"+ str(time.time() - start_time), end='\n\t')
+        print(f"Every file stream opened and initialized : "+ str(time.time() - start_time), end='\n\t')
         inter_time = time.time()
 
         plc = defaultdict(dict)
@@ -136,9 +144,9 @@ def merge_blocks_on_disk():
 
 if __name__ == "__main__":
     ##############################################
-    n = 2 # Nombre de bloc sur lequel on travaille.
+    n = 5 # Nombre de bloc sur lequel on travaille.
     ##############################################
     create_blocks(n)
 
-    # merge_blocks_on_disk()
+    merge_blocks_on_disk()
     # import pdb; pdb.set_trace()

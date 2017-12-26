@@ -5,7 +5,7 @@ import ctypes
 import nltk
 from nltk.stem import SnowballStemmer
 
-from simplemapreduce import SimpleMapReduce
+from simplemapreduce import MapDoubleReduce
 from mpdocument import Document
 
 class MpBlock(object):
@@ -23,6 +23,18 @@ class MpBlock(object):
 
     def __str__(self):
         return f'block.Block object. Collection: {self.collection.title}.Path: {self.path}'
+
+
+    def create_posting_list(self):
+        mapper = MapDoubleReduce(
+            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=None)
+        posting_list, doc_vecs = mapper(self.input_files, chunksize=2500) # Quad-core assumed
+        # Finally
+        posting_list = self.update_pl_with_id(posting_list)
+        doc_vecs = self.update_dv_with_id(doc_vecs)
+        self.posting_list = OrderedDict(sorted(posting_list, key=lambda x: x[0]))
+        self.update_documents_with_dv(OrderedDict(doc_vecs))
+        self.collection.doc_id_offset = int(self.doc_id.value)
 
     def file_to_words(self, filename):
         stemmer = SnowballStemmer("english")
@@ -55,26 +67,42 @@ class MpBlock(object):
         stemmed_word, doc_id_list = item
         return (stemmed_word, OrderedDict(sorted(Counter(doc_id_list).items(), key=lambda x: x[0])))
 
-    def create_posting_list(self):
-        mapper = SimpleMapReduce(self.file_to_words, self.count_words, num_workers=None)
-        posting_list = mapper(self.input_files, chunksize=2500)
-        # posting_list.sort(key=operator.itemgetter(0))
-        self.update_with_id(posting_list)
+    def calc_doc_vec(self, item):
+        doc_id, stemmed_word_list = item
+        return (doc_id, OrderedDict(sorted(Counter(stemmed_word_list).items(), key=lambda x: x[0])))
 
-        # Finally
-        self.posting_list = OrderedDict(posting_list)
-        self.collection.doc_id_offset = int(self.doc_id.value)
-
-    def update_with_id(self, posting_list):
+    def update_pl_with_id(self, posting_list):
         # Dictionary update here
         dictionary = self.collection.dictionary
-        offset = max(dictionary.values(), default=-1)
+        incremental_id = max(dictionary.values(), default=0)
         for i, pl_tuple in enumerate(posting_list):
             word = pl_tuple[0]
             try:
-                term_id = dictionary[word]
+                word_id = dictionary[word]
             except KeyError:
-                offset += 1
-                term_id = offset
-                self.collection.dictionary[word] = term_id
-            posting_list[i] = (term_id, pl_tuple[1])
+                word_id = incremental_id
+                incremental_id += 1
+                dictionary[word] = word_id
+            posting_list[i] = (word_id, pl_tuple[1])
+        return posting_list
+    
+    def update_dv_with_id(self, doc_vecs):
+        # Dictionary update here
+        dictionary = self.collection.dictionary
+        for i, dv_tuple in enumerate(doc_vecs):
+            doc_id = dv_tuple[0]
+            words_counter = dv_tuple[1]
+            id_counter = Counter()
+            for word in words_counter:
+                word_id = dictionary[word]
+                id_counter[word_id] = words_counter[word]
+            doc_vecs[i] = (doc_id, id_counter)
+        return doc_vecs
+
+    def update_documents_with_dv(self, doc_vecs):
+        for i, doc in enumerate(self.documents):
+            try:
+                doc.vector = doc_vecs[doc.doc_id]
+                self.documents[i] = doc
+            except KeyError: # The doc has no term (every tokens were thrown away)
+                pass
