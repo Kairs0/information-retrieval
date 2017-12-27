@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from nltk.stem import SnowballStemmer
 
 class Collection:
@@ -7,9 +8,8 @@ class Collection:
     def __init__(self, path, title):
         self.title = title
         self.path = path
-        self.blocks = []
 
-        self.dictionary = {}
+        self.dictionary = OrderedDict()
         self.doc_id_offset = 0
 
         with open(r'.\collection_data\CACM\common_words') as file:
@@ -20,12 +20,10 @@ class Collection:
         from block import Block
         block_path = self.path if i is None else f'{self.path}\{i}'
         block = Block(self, block_path)
-        self.blocks.append(block)
         return block
 
-    def create_mpblock(self, i=None, manager=None):
+    def create_mpblock(self, i=None):
         from mpblock import MpBlock
         block_path = self.path if i is None else f'{self.path}\{i}'
-        block = MpBlock(self, block_path, manager)
-        self.blocks.append(block)
+        block = MpBlock(self, block_path)
         return block
