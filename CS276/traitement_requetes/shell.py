@@ -22,15 +22,16 @@ def research(search_type,query):
     elif search_type == 'v' or search_type == "vector":
         return vector_research.process_query(query, dictionary, inverse_index_freq, list_doc_weight)
 
-
 if __name__ == "__main__":
+
     RECORD_TIME = False
     search_type = None
     query = None
 
+
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'm:tr:', ['model', 't', 'request'])
-        # import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
 
     # if illegal arguments, print usage to user and exit
     except getopt.GetoptError:
@@ -70,6 +71,7 @@ if __name__ == "__main__":
     doc_id_list = list_doc_weight.keys()
 
     print(" => Indexes loaded.")
+    
 
     while shell_open:
         str_query = input(">> ")

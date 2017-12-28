@@ -5,6 +5,12 @@ import timeit
 import boolean_research
 import vector_research
 
+PATH_COLLECTION = r'..\collection_data\cacm.all'
+PATH_DICTIONARY = r'..\fichiers_traitements\dictionary.json'
+PATH_INVERSE_INDEX_SIMPLE = r'..\fichiers_traitements\inverse_index_simple.json'
+PATH_INVERSE_INDEX_FREQ = r'..\fichiers_traitements\inverse_index_freq.json'
+PATH_LIST_DOC_WEIGHT = r'..\fichiers_traitements\list_doc_weight.json'
+
 
 def print_usage():
     """
@@ -14,9 +20,9 @@ def print_usage():
     print("Options and arguments:")
     print("-m --model\t: research model chosen for the search. ['b','boolean', 'v', 'vector']")
     print("-t\t\t: enable the time record.")
-    print("-r --request\t: request (main argument).")
+    # print("-r --request\t: request (main argument).")
 
-def research(search_type,query):
+def research(search_type, query):
     if search_type == 'b' or search_type == "boolean":
         return boolean_research.process_query(query, dictionary, inverse_index_simple, doc_id_list)
     elif search_type == 'v' or search_type == "vector":
@@ -43,8 +49,8 @@ if __name__ == "__main__":
             search_type = a
         elif o == '-t' or o == '--time':
             RECORD_TIME = True
-        elif o == '-r' or o == '--request':
-            query = a
+        # elif o == '-r' or o == '--request':
+        #     query = a
         else:
             assert False, "unhandled option"
 
@@ -55,16 +61,16 @@ if __name__ == "__main__":
     shell_open = True
     print("Loading indexes...", end="")
 
-    with open("dictionary.json", "r") as f:
+    with open(PATH_DICTIONARY, "r") as f:
         dictionary = json.load(f)
 
-    with open("inverse_index_simple.json", "r") as f2:
+    with open(PATH_INVERSE_INDEX_SIMPLE, "r") as f2:
         inverse_index_simple = json.load(f2)
 
-    with open("inverse_index_freq.json", "r") as f3:
+    with open(PATH_INVERSE_INDEX_FREQ, "r") as f3:
         inverse_index_freq = json.load(f3)
 
-    with open("list_doc_weight.json", "r") as f4:
+    with open(PATH_LIST_DOC_WEIGHT, "r") as f4:
         list_doc_weight = json.load(f4)
 
     doc_id_list = list_doc_weight.keys()
