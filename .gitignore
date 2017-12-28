@@ -1,19 +1,16 @@
 # Arnaud: Collection CS276 non soumise sur git car trop volumineuse
 collection_data/CS276/*
 
-traitements_linguistiques/code-arnaud/.idea/*
-traitements_linguistiques/code-arnaud/__pycache__/*
-
 CACM/fichiers_traitements/*
-
-CS276/traitement_requetes/__pycache__/*
-
 CACM/collection_data/__pycache__/*
 CACM/indexation/__pycache__/*
 CACM/questions_prealables/__pycache__/*
-CS276/fichiers_traitements/*
 CACM/traitement_requetes/__pycache__/*
+
+CS276/traitement_requetes/__pycache__/*
+CS276/fichiers_traitements/*
 CS276/collection_data/*
+!CS276/collection_data/common_words
 CS276/indexation/__pycache__/*
 CS276/questions_prealables/__pycache__/*
 
