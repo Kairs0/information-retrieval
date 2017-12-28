@@ -5,6 +5,10 @@ import timeit
 import boolean_research
 import vector_research
 
+###### TODO (pour l'instant: meme shell que cacm)
+
+PATH_COLLECTION = r'..\collection_data'
+PATH_FOLDER_JSONS = r'..\fichiers_traitements'
 
 def print_usage():
     """
@@ -56,16 +60,16 @@ if __name__ == "__main__":
     shell_open = True
     print("Loading indexes...", end="")
 
-    with open("dictionary.json", "r") as f:
+    with open(f'{PATH_FOLDER_JSONS}\dictionary.json', "r") as f:
         dictionary = json.load(f)
 
-    with open("inverse_index_simple.json", "r") as f2:
+    with open(f'{PATH_FOLDER_JSONS}\inverse_index_simple.json', "r") as f2:
         inverse_index_simple = json.load(f2)
 
-    with open("inverse_index_freq.json", "r") as f3:
+    with open(f'{PATH_FOLDER_JSONS}\'inverse_index_freq.json', "r") as f3:
         inverse_index_freq = json.load(f3)
 
-    with open("list_doc_weight.json", "r") as f4:
+    with open(f'{PATH_FOLDER_JSONS}\'list_doc_weight.json', "r") as f4:
         list_doc_weight = json.load(f4)
 
     doc_id_list = list_doc_weight.keys()
