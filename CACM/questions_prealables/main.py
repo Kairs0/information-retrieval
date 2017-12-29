@@ -1,18 +1,24 @@
 import math
 import time
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plot
 
 import sys
 sys.path.insert(0, "../indexation")
-
+# Set indexation folder content at same level as current file
 from collection import Collection
 
 PATH_COLLECTION = r'..\collection_data\cacm.all'
 PATH_COMMON_WORDS = r'../collection_data/common_words'
 
+
+def print_time():
+    print("Result calculated in " + str(round(time.time() - START_TIME, 2)) + " s")
+    print("-------------------------------------------------\n")
+
+
 if __name__ == "__main__":
-    start_time = time.time()
+    START_TIME = time.time()
 
     collection = Collection(PATH_COLLECTION, "cacm")
     collection.calc_documents()
@@ -23,20 +29,15 @@ if __name__ == "__main__":
 
     # Question 1
     print("Q1. Number of tokens: ")
-    # print(tokens)
     print(len(tokens))
-    t1 = time.time()
-    print("Result calculated in " + str(round(t1 - start_time, 2)) + " s")
-    print("-------------------------------------------------\n")
+    print_time()
 
     # Question 2
     print("Q2. Size of vocabulary: ")
     collection.calc_vocabulary(PATH_COMMON_WORDS)
     voc_coll = collection.vocabulary
     print(len(voc_coll))
-    t2 = time.time()
-    print("Result calculated in " + str(round(t2 - start_time, 2)) + " s")
-    print("-------------------------------------------------\n")
+    print_time()
 
     # Question 3
     print("Q3. Nb of tokens and size of vocabulary for half the collection")
@@ -58,15 +59,13 @@ if __name__ == "__main__":
         math.log(len(tokens) / len(half_tokens))
     k = len(voc_coll) / (len(tokens) ** b)
     print("K : ", k, " |  B : ", b)
-    t3 = time.time()
-    print("Result calculated in " + str(round(t3 - start_time, 2)) + " s")
-    print("-------------------------------------------------\n")
+    print_time()
 
     # Question 4
     print("Q4. Estimation of the size of a one-million-tokens-collection's vocabulary")
     result = math.floor(k*(1000000**b))
     print("Result : ", result)
-    print("-------------------------------------------------\n")
+    print_time()
 
     # Question 5
     print("Q5. Zipf Law : Graph Frequency vs Rank :")
@@ -81,18 +80,18 @@ if __name__ == "__main__":
     occurrences = []
     for value in sorted(token_occurrence.values(), reverse=True):
         occurrences.append(value)
-    plt.plot(ranks, occurrences)
-    plt.xlabel('Rank')
-    plt.ylabel('Occurrence')
-    plt.title("Frequency vs Rank")
-    plt.show()
+    plot.plot(ranks, occurrences)
+    plot.xlabel('Rank')
+    plot.ylabel('Occurrence')
+    plot.title("Frequency vs Rank")
+    plot.show()
     print("Graph frequency vs inverse rank")
     inverse_rank = 1. / np.array(range(1, len(token_occurrence) + 1))
-    plt.xlabel('1 / Rank')
-    plt.ylabel('Occurrence')
-    plt.title("Frequency vs inverse Rank")
-    plt.plot(inverse_rank, occurrences)
-    plt.show()
+    plot.xlabel('1 / Rank')
+    plot.ylabel('Occurrence')
+    plot.title("Frequency vs inverse Rank")
+    plot.plot(inverse_rank, occurrences)
+    plot.show()
     print("Graph log(f) vs log(r)")
     log_ranks = []
     for rank_log_value in map(math.log, range(1, len(token_occurrence) + 1)):
@@ -102,8 +101,8 @@ if __name__ == "__main__":
     for value in sorted(token_occurrence.values(), reverse=True):
         log_freq.append(math.log(value))
 
-    plt.plot(log_ranks, log_freq)
-    plt.xlabel('Log rank')
-    plt.ylabel('Log occurrence')
-    plt.title("log frequency vs log Rank")
-    plt.show()
+    plot.plot(log_ranks, log_freq)
+    plot.xlabel('Log rank')
+    plot.ylabel('Log occurrence')
+    plot.title("log frequency vs log Rank")
+    plot.show()
