@@ -7,8 +7,8 @@ import vector_research
 
 PATH_COLLECTION = r'..\collection_data\cacm.all'
 PATH_DICTIONARY = r'..\fichiers_traitements\dictionary.json'
-PATH_INVERSE_INDEX_SIMPLE = r'..\fichiers_traitements\inverse_index_simple.json'
-PATH_INVERSE_INDEX_FREQ = r'..\fichiers_traitements\inverse_index_freq.json'
+PATH_INVERTED_INDEX_SIMPLE = r'..\fichiers_traitements\inverse_index_simple.json'
+PATH_INVERTED_INDEX_FREQ = r'..\fichiers_traitements\inverse_index_freq.json'
 PATH_LIST_DOC_WEIGHT = r'..\fichiers_traitements\list_doc_weight.json'
 
 
@@ -23,13 +23,13 @@ def print_usage():
     # print("-r --request\t: request (main argument).")
 
 
-def research(search_type, query):
-    if search_type == 'b' or search_type == "boolean":
-        return boolean_research.process_query(query, dictionary, inverse_index_simple, doc_id_list)
-    elif search_type == 'v2':
-        return vector_research.process_query_v2(query, dictionary, inverse_index_freq)
-    elif search_type == 'v' or search_type == "vector":
-        return vector_research.process_query(query, dictionary, inverse_index_freq, list_doc_weight)
+def research(type_search, query_string):
+    if type_search == 'b' or type_search == "boolean":
+        return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
+    elif type_search == 'v2':
+        return vector_research.process_query_v2(query_string, dictionary, inverse_index_freq)
+    elif type_search == 'v' or type_search == "vector":
+        return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
 
 
 if __name__ == "__main__":
@@ -67,10 +67,10 @@ if __name__ == "__main__":
     with open(PATH_DICTIONARY, "r") as f:
         dictionary = json.load(f)
 
-    with open(PATH_INVERSE_INDEX_SIMPLE, "r") as f2:
+    with open(PATH_INVERTED_INDEX_SIMPLE, "r") as f2:
         inverse_index_simple = json.load(f2)
 
-    with open(PATH_INVERSE_INDEX_FREQ, "r") as f3:
+    with open(PATH_INVERTED_INDEX_FREQ, "r") as f3:
         inverse_index_freq = json.load(f3)
 
     with open(PATH_LIST_DOC_WEIGHT, "r") as f4:
