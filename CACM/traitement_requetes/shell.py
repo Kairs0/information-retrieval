@@ -22,9 +22,12 @@ def print_usage():
     print("-t\t\t: enable the time record.")
     # print("-r --request\t: request (main argument).")
 
+
 def research(search_type, query):
     if search_type == 'b' or search_type == "boolean":
         return boolean_research.process_query(query, dictionary, inverse_index_simple, doc_id_list)
+    elif search_type == 'v2':
+        return vector_research.process_query_v2(query, dictionary, inverse_index_freq)
     elif search_type == 'v' or search_type == "vector":
         return vector_research.process_query(query, dictionary, inverse_index_freq, list_doc_weight)
 

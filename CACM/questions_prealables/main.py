@@ -3,9 +3,9 @@ import time
 import numpy as np
 import matplotlib.pyplot as plot
 
+# Set indexation folder content at same level as current file
 import sys
 sys.path.insert(0, "../indexation")
-# Set indexation folder content at same level as current file
 from collection import Collection
 
 PATH_COLLECTION = r'..\collection_data\cacm.all'
