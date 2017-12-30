@@ -1,9 +1,9 @@
-import json
 from collections import defaultdict, OrderedDict, Counter
 from nltk.stem import SnowballStemmer
 from document import Document
 
 PATH_COMMON_WORDS = r'../collection_data/common_words'
+LOWER_LENGTH_FOR_WORD = 1
 
 
 class Collection:
@@ -35,6 +35,7 @@ class Collection:
             document.clean_words()
             document.tokenize()
 
+    # https://stackoverflow.com/a/18262662
     def create_posting_list(self):
         """
         create a dictionary and the posting_list :
@@ -52,11 +53,14 @@ class Collection:
         dictionary = defaultdict(int)
         posting_list = defaultdict(dict)
 
-        incremental_id = 0 # Initialisation des id term
+        incremental_id = 0  # Initialisation des id term
         for document in self.documents:
+            doc_id = document.doc_id
             for token in document.tokens:
-                # On nettoye le token
-                if len(token) == 1:
+                # On passe à la prochaine itération
+                # de la boucle s'il s'agit d'un unique
+                # caractère ou s'il est dans la liste des mot communs
+                if len(token) == LOWER_LENGTH_FOR_WORD:
                     continue
                 stemmed_word = self.stemmer.stem(token)
                 if stemmed_word in common_words_list:
@@ -72,42 +76,47 @@ class Collection:
                     # On récupère son id
                     term_id = dictionary[stemmed_word]
                 # On màj la posting-list
-                doc_id = document.doc_id
                 if doc_id not in posting_list[term_id].keys():
-                    posting_list[term_id][doc_id] = 1        # Ajout d'une nouvelle key
+                    posting_list[term_id][doc_id] = 1        # Ajout d'un nouveau docID
                 else:
-                    posting_list[term_id][doc_id] += 1      # Incrément d'une key existante
+                    posting_list[term_id][doc_id] += 1      # Incrément de la frequence d'un doc
                 # Enfin on ajoute le term au voc du doc pour calculer son poids après
                 document.vocabulary[term_id] += 1
 
         return posting_list, OrderedDict(sorted(dictionary.items(), key=lambda x: x[0]))
 
-    def create_docID_index(self, posting_list):
-        docID_index = defaultdict(list)
+    """
+    From the posting list, creates the inverted index :
+    key = (int) termID
+    value = (list) (int) docs ids 
+    """
+    @staticmethod
+    def create_inverted_index(posting_list):
+        inverted_index = defaultdict(list)
         for term_id in posting_list.keys():
-            docID_index[term_id] = list(posting_list[term_id].keys())
-        return docID_index
-    
+            documents_ids = list(posting_list[term_id].keys())
+            inverted_index[term_id] = documents_ids
+        return inverted_index
 
-    def create_docID_weight(self, docID_index):
+    """
+    TODO Arnaud comprendre utilité
+    From the inverted index, creates a weighted index for each doc (?)
+    key: (int) 
+    """
+    def create_docID_weight(self, inverted_index):
         # We may need to use the Decimal type
         docID_weight = defaultdict(float)
         for document in self.documents:
             total_doc_weight = 0
+            # Calculates a weight for each document.
+            #
             for term_id, freq in document.vocabulary.items():
-                total_doc_weight += freq*len(self.documents)/len(docID_index[term_id])
+                total_doc_weight += freq*len(self.documents)/len(inverted_index[term_id])
             docID_weight[document.doc_id] = float("{0:.2f}".format(total_doc_weight))
 
         return docID_weight
 
-    # Useless since MàJ posting_list
-    def create_docID_index_with_frequency(self, posting_list, dictionary):
-        docID_index_with_frequency = defaultdict(list)
-        for term_id in dictionary.values():
-            docID_index_with_frequency[term_id] = list(Counter(posting_list[term_id]).items())
-        return docID_index_with_frequency
-
-    # OLD
+    # USED in question_prealables
     def calc_vocabulary(self, common_words_file):
         with open(common_words_file) as file:
             content_common = file.read()
@@ -117,13 +126,3 @@ class Collection:
             for token_lowered in set(map(str.lower, document.tokens)):
                 if token_lowered not in common_words_list:
                     self.vocabulary.add(token_lowered)
-
-    # OLD
-    def create_dictionary(self):
-        dic_term_term_id = defaultdict(int)
-        terms = self.vocabulary
-        for i, term in enumerate(terms):
-            dic_term_term_id[term] = i
-        # generate json file
-        with open("dic_terms.json", 'w') as json_file:
-            json.dump(dic_term_term_id, json_file)
