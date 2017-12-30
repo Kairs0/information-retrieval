@@ -10,6 +10,7 @@ import vector_research
 PATH_COLLECTION = r'..\collection_data'
 PATH_FOLDER_JSONS = r'..\fichiers_traitements'
 
+
 def print_usage():
     """
     prints the proper command usage
@@ -18,13 +19,16 @@ def print_usage():
     print("Options and arguments:")
     print("-m --model\t: research model chosen for the search. ['b','boolean', 'v', 'vector']")
     print("-t\t\t: enable the time record.")
-    print("-r --request\t: request (main argument).")
 
-def research(search_type,query):
-    if search_type == 'b' or search_type == "boolean":
-        return boolean_research.process_query(query, dictionary, inverse_index_simple, doc_id_list)
-    elif search_type == 'v' or search_type == "vector":
-        return vector_research.process_query(query, dictionary, inverse_index_freq, list_doc_weight)
+
+def research(type_search, query_string):
+    # if type_search == 'b' or type_search == "boolean":
+    #     return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
+    # elif type_search == 'v' or type_search == "vector":
+    #     return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
+    if type_search == 'v' or type_search == "vector":
+        return vector_research.process_query(query_string, dictionary, inverse_index_freq)
+
 
 if __name__ == "__main__":
 
@@ -53,7 +57,7 @@ if __name__ == "__main__":
         else:
             assert False, "unhandled option"
 
-    if (search_type is None):
+    if search_type is None:
         print_usage()
         sys.exit(2)
 
@@ -63,31 +67,30 @@ if __name__ == "__main__":
     with open(f'{PATH_FOLDER_JSONS}\dictionary.json', "r") as f:
         dictionary = json.load(f)
 
-    with open(f'{PATH_FOLDER_JSONS}\inverse_index_simple.json', "r") as f2:
-        inverse_index_simple = json.load(f2)
+    # with open(f'{PATH_FOLDER_JSONS}\inverse_index_simple.json', "r") as f2:
+    #     inverse_index_simple = json.load(f2)
 
-    with open(f'{PATH_FOLDER_JSONS}\'inverse_index_freq.json', "r") as f3:
+    with open(f'{PATH_FOLDER_JSONS}\posting_list_complete.json', "r") as f3:
         inverse_index_freq = json.load(f3)
 
-    with open(f'{PATH_FOLDER_JSONS}\'list_doc_weight.json', "r") as f4:
-        list_doc_weight = json.load(f4)
+    # with open(f'{PATH_FOLDER_JSONS}\'list_doc_weight.json', "r") as f4:
+    #     list_doc_weight = json.load(f4)
 
-    doc_id_list = list_doc_weight.keys()
+    # doc_id_list = list_doc_weight.keys()
 
     print(" => Indexes loaded.")
-    
 
     while shell_open:
         str_query = input(">> ")
         if str_query == "exit()":
             shell_open = False
         else:
-            if (RECORD_TIME):
+            if RECORD_TIME:
                 start = timeit.default_timer()                                      # start time
 
             print(research(search_type, str_query))
 
-            if (RECORD_TIME):
+            if RECORD_TIME:
                 stop = timeit.default_timer()                                       # stop time
-            if (RECORD_TIME):
+            if RECORD_TIME:
                 print('Query time: ' + str(stop - start))      # print time taken

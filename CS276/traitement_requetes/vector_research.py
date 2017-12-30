@@ -1,10 +1,36 @@
-"""
-TO-DO
-"""
+import math
 from collections import Counter, OrderedDict
 import nltk
 
-def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
+
+def process_query(query, dictionary, inverse_index_freq):
+    dictionary = OrderedDict(dictionary)
+    scores = Counter()
+    stemmer = nltk.stem.SnowballStemmer("english")
+    query_words = Counter(map(stemmer.stem, query.split()))
+    request_weight = sum(map(calc_balanced_weight, query_words.values()))
+    for term in query_words:
+        try:
+            term_id = dictionary[term]
+            posting_list = inverse_index_freq[str(term_id)]
+            for doc_id, freq in posting_list.items():
+                scores[doc_id] += calc_balanced_weight(int(freq)) * request_weight
+        except KeyError:
+            pass
+    doc_numbers = len(scores)
+    for document in scores:
+        scores[document] = scores[document] / doc_numbers
+    return scores.most_common(3)
+
+
+def calc_balanced_weight(number_occurrence):
+    if number_occurrence == 0:
+        return 0
+    else:
+        return 1 + round(math.log(number_occurrence, 10), 5)
+
+
+def process_query_old(query, dictionary, inverse_index_freq, list_doc_weight):
     dictionary = OrderedDict(dictionary)
 
     docs_number = len(list_doc_weight)

@@ -4,6 +4,7 @@ TO-DO
 from collections import deque, OrderedDict, defaultdict
 import nltk
 
+
 def simple_request(term):
     try:
         if type(term) is list:
