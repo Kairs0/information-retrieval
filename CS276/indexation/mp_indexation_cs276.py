@@ -19,6 +19,7 @@ def init_indexation():
         doc_index_file.write(b'{')
         doc_vecs_file.write(b'{')
 
+
 def index_block(collection, block_i):
     inter_time = time.time()
 
@@ -51,6 +52,7 @@ def index_block(collection, block_i):
     with open(f'{PATH_FOLDER_JSONS}\dictionary.json', 'w') as json_index:
         ujson.dump(collection.dictionary, json_index)
 
+
 def end_indexation():
     with \
         open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'r+b') as doc_index_file,\
@@ -63,6 +65,7 @@ def end_indexation():
 ##############################################################################
 ############### BSBI MERGE ###################################################
 ##############################################################################
+
 
 def merge_blocks_on_disk():
     start_time = time.time()
@@ -150,6 +153,7 @@ def merge_blocks_on_disk():
     end_time = time.time()
     print("Result calculated in " + str(round(end_time - start_time, 2)) + " s")
 
+
 if __name__ == "__main__":
     if not gc.isenabled():
         gc.enable()
@@ -173,7 +177,7 @@ if __name__ == "__main__":
 
     end_indexation()
 
-    print(f"All blocks indexed: "+ str(time.time() - start_time))
+    print(f"All blocks indexed: " + str(time.time() - start_time))
 
     # BSBI, on merge ici !	
     print("\n\n=========================================\nStarting BSBI Merging: ")
