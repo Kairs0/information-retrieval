@@ -1,6 +1,3 @@
-"""
-TO-DO
-"""
 from collections import Counter, OrderedDict
 import nltk
 import math
@@ -24,7 +21,7 @@ def process_query_v2(query, dictionary, inverse_index_freq):
             for doc_id, freq in posting_list.items():
                 scores[doc_id] += calc_balanced_weight(int(freq)) * request_weight
         except KeyError:
-            # case user search for a word not present in our collection
+            # case user searches for a word not present in our collection
             pass
 
     doc_numbers = len(scores)
