@@ -16,9 +16,9 @@ def print_usage():
     """
     prints the proper command usage
     """
-    print("usage: " + sys.argv[0] + " -m model | -t | -r request")
+    print("usage: " + sys.argv[0] + " -m model | -t")
     print("Options and arguments:")
-    print("-m --model\t: research model chosen for the search. ['b','boolean', 'v', 'vector']")
+    print("-m --model\t: research model chosen for the search. ['b','boolean', 'v', 'vector', 'v2', 'vector v2']")
     print("-t\t\t: enable the time record.")
     # print("-r --request\t: request (main argument).")
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         else:
             assert False, "unhandled option"
 
-    if (search_type is None):
+    if search_type is None:
         print_usage()
         sys.exit(2)
 
@@ -85,12 +85,12 @@ if __name__ == "__main__":
         if str_query == "exit()":
             shell_open = False
         else:
-            if (RECORD_TIME):
+            if RECORD_TIME:
                 start = timeit.default_timer()                                      # start time
 
             print(research(search_type, str_query))
 
-            if (RECORD_TIME):
+            if RECORD_TIME:
                 stop = timeit.default_timer()                                       # stop time
-            if (RECORD_TIME):
-                print('Query time: ' + str(stop - start))      # print time taken
+            if RECORD_TIME:
+                print('Query time: ' + str(round(stop - start, 3) * 10e3) + ' ms')      # print time taken
