@@ -4,6 +4,7 @@ import io
 from collections import defaultdict
 import ujson
 import ijson
+import math
 import os.path
 from collection import Collection
 
@@ -13,8 +14,8 @@ PATH_FOLDER_JSONS = r'..\fichiers_traitements'
 
 def init_indexation():
     with \
-        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'wb') as doc_index_file,\
-        open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'wb') as doc_vecs_file:
+        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'wb') as doc_index_file, \
+            open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'wb') as doc_vecs_file:
 
         doc_index_file.write(b'{')
         doc_vecs_file.write(b'{')
@@ -55,8 +56,8 @@ def index_block(collection, block_i):
 
 def end_indexation():
     with \
-        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'r+b') as doc_index_file,\
-        open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'r+b') as doc_vecs_file:
+        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'r+b') as doc_index_file, \
+            open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'r+b') as doc_vecs_file:
         doc_index_file.seek(-1, 2)
         doc_vecs_file.seek(-1, 2)
         doc_vecs_file.write(b'}')
@@ -71,16 +72,16 @@ def merge_blocks_on_disk():
     start_time = time.time()
     with \
         open(f'{PATH_FOLDER_JSONS}\posting_list_block0.json', mode='rb') as pl0,\
-        open(f'{PATH_FOLDER_JSONS}\posting_list_block1.json', mode='rb') as pl1,\
-		open(f'{PATH_FOLDER_JSONS}\posting_list_block2.json', mode='rb') as pl2,\
-        open(f'{PATH_FOLDER_JSONS}\posting_list_block3.json', mode='rb') as pl3,\
-		open(f'{PATH_FOLDER_JSONS}\posting_list_block4.json', mode='rb') as pl4,\
-        open(f'{PATH_FOLDER_JSONS}\posting_list_block5.json', mode='rb') as pl5,\
-		open(f'{PATH_FOLDER_JSONS}\posting_list_block6.json', mode='rb') as pl6,\
-        open(f'{PATH_FOLDER_JSONS}\posting_list_block7.json', mode='rb') as pl7,\
-		open(f'{PATH_FOLDER_JSONS}\posting_list_block8.json', mode='rb') as pl8,\
-        open(f'{PATH_FOLDER_JSONS}\posting_list_block9.json', mode='rb') as pl9,\
-        open(f'{PATH_FOLDER_JSONS}\posting_list_complete.json', mode='wb') as plc_file:
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block1.json', mode='rb') as pl1,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block2.json', mode='rb') as pl2,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block3.json', mode='rb') as pl3,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block4.json', mode='rb') as pl4,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block5.json', mode='rb') as pl5,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block6.json', mode='rb') as pl6, \
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block7.json', mode='rb') as pl7, \
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block8.json', mode='rb') as pl8,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_block9.json', mode='rb') as pl9,\
+            open(f'{PATH_FOLDER_JSONS}\posting_list_complete.json', mode='wb') as plc_file:
 
         pl_list = [pl0, pl1, pl2, pl3, pl4, pl5, pl6, pl7, pl8, pl9]    # BufferedReaders' list
         parser_list = [ijson.parse(pl, buf_size=io.DEFAULT_BUFFER_SIZE) for pl in pl_list]
@@ -88,21 +89,21 @@ def merge_blocks_on_disk():
         # We init curr_keys
         for parser in parser_list:
             for prefix, event, value in parser:
-                if  (prefix, event) == ('', 'map_key'):
+                if (prefix, event) == ('', 'map_key'):
                     curr_keys[parser] = value
                     break
 
         # We init plc_file
         plc_file.write(b'{')
 
-        print(f"Every files/streams opened and initialized : "+ str(time.time() - start_time), end='\n\t')
+        print(f"Every files/streams opened and initialized : " + str(time.time() - start_time), end='\n\t')
         inter_time = time.time()
 
         plc = defaultdict(dict)
         # import pdb; pdb.set_trace()
         while parser_list:
             # While every pl is not fully processed, do:
-            buff = 0 # Init writing buff
+            buff = 0  # Init writing buff
             while buff < 4 * 1024:
                 # While buff is not full, do:
                 # We process the smallest keys
@@ -141,8 +142,8 @@ def merge_blocks_on_disk():
             # import pdb; pdb.set_trace()
             plc_file.write(bytes(ujson.dumps(plc), 'utf8')[1:-1] + b',')
             if min_key % (8 * 4 * 1024) == 4 * 1024 - 1:
-                print(f'Posting List (term_id <= {min_key}) written on disk: '\
-                    + str(time.time() - inter_time), end='\n\t')
+                print(f'Posting List (term_id <= {min_key}) written on disk: ' +
+                      str(time.time() - inter_time), end='\n\t')
                 inter_time = time.time()
             plc = defaultdict(dict)
 
@@ -151,7 +152,27 @@ def merge_blocks_on_disk():
 
     # Files closed
     end_time = time.time()
-    print("Result calculated in " + str(round(end_time - start_time, 2)) + " s")
+    print("Posting list complete generated in " + str(round(end_time - start_time, 2)) + " s")
+
+
+def generate_list_weight_docs():
+    start_time = time.time()
+    with open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', mode='rb') as vecs_file:
+        parser = ijson.parse(vecs_file)
+        docs_weight_list = defaultdict(int)
+        for prefix, event, value in parser:
+            if event == 'number':
+                doc_id = int(prefix.split('.')[0])
+                freq = value
+                docs_weight_list[doc_id] += freq**2
+
+        for key in docs_weight_list:
+            docs_weight_list[key] = math.sqrt(docs_weight_list[key])
+
+    with open(f'{PATH_FOLDER_JSONS}\list_doc_weight.json', mode='w') as doc_weight:
+        ujson.dump(docs_weight_list, doc_weight)
+
+    print("List weight docs generated in " + str(round(time.time() - start_time, 2)) + " s")
 
 
 if __name__ == "__main__":
@@ -179,9 +200,13 @@ if __name__ == "__main__":
 
     print(f"All blocks indexed: " + str(time.time() - start_time))
 
-    # BSBI, on merge ici !	
+    # BSBI, on merge ici !
     print("\n\n=========================================\nStarting BSBI Merging: ")
     merge_blocks_on_disk()
     # Il faut calculer le poid total de chaque doc ici pour pouvoir faire la recherche vectoriel.
     # Attention le fichier doc_vecs est très lourd, le prendre comme un stream est une bonne idée, (quitte à le parcourir plusieurs fois)
     # import pdb; pdb.set_trace()
+
+    # Generation fichier docs_weights
+    print("\n\n=========================================\nStarting generation of weight per doc")
+    generate_list_weight_docs()

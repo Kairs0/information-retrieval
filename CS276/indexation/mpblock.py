@@ -8,6 +8,7 @@ from nltk.stem import SnowballStemmer
 from simplemapreduce import MapDoubleReduce
 from mpdocument import Document
 
+
 class MpBlock(object):
 
     def __init__(self, collection, path):
@@ -36,7 +37,7 @@ class MpBlock(object):
 
     def create_posting_list(self):
         mapper = MapDoubleReduce(
-            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=4) # Quad-core assumed
+            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=4)  # Quad-core assumed
         posting_list, doc_vecs = mapper(self.input_files, chunksize=2450)
         # Finally
         posting_list = self.update_pl_with_id(posting_list)
