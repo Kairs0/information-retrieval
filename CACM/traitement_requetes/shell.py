@@ -27,7 +27,7 @@ def research(type_search, query_string):
     if type_search == 'b' or type_search == "boolean":
         return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
     elif type_search == 'v2':
-        return vector_research.process_query_v2(query_string, dictionary, inverse_index_freq)
+        return vector_research.process_query_v2(query_string, dictionary, inverse_index_freq, list_doc_weight)
     elif type_search == 'v' or type_search == "vector":
         return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
 
