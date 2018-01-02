@@ -3,11 +3,13 @@ import nltk
 import math
 
 
-def calc_balanced_weight(number_occurrence):
-    if number_occurrence == 0:
+def calc_balanced_weight(number_occurrence_term_in_doc, number_docs=0, number_docs_with_term=0):
+    if number_occurrence_term_in_doc == 0:
         return 0
     else:
-        return 1 + round(math.log(number_occurrence, 10), 5)
+        log_freq = math.log(number_occurrence_term_in_doc, 10)
+        term_inverse_frequency = math.log(number_docs/number_docs_with_term, 10)
+        return round((1 + log_freq)*term_inverse_frequency, 10)
 
 
 def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
@@ -19,20 +21,24 @@ def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
     stemmer = nltk.stem.SnowballStemmer("english")  # instantiate stemmer
     query_words = Counter(map(stemmer.stem, query.split()))
 
-    request_weight = sum(map(calc_balanced_weight, query_words.values()))
-
     relevant_doc_list = set()
     scores = Counter()
 
+    number_docs_total = len(list_doc_weight)
+
+    request_weight = 0
+
     for word, freq in query_words.items():
-        weight_term_request = calc_balanced_weight(freq)
         try:
             id_word = dictionary[word]
             documents_freq_for_term = Counter(inverse_index_freq[str(id_word)])
+            nbr_docs_with_terms = len(documents_freq_for_term)
+            weight_term_request = calc_balanced_weight(freq, number_docs_total, nbr_docs_with_terms)
+            request_weight += weight_term_request
             for doc_id in documents_freq_for_term:
                 relevant_doc_list.add(doc_id)
                 scores[doc_id] += \
-                    calc_balanced_weight(documents_freq_for_term[doc_id]) * \
+                    calc_balanced_weight(documents_freq_for_term[doc_id], number_docs_total, nbr_docs_with_terms) * \
                     weight_term_request
         except KeyError:
             pass
