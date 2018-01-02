@@ -1,7 +1,4 @@
-"""
-TO-DO
-"""
-from collections import deque, OrderedDict, defaultdict
+from collections import deque, OrderedDict
 import nltk
 
 
@@ -76,7 +73,7 @@ def process_query(query, dictionary, posting_list, docid_list):
 
     # NOTE: at this point results_stack should only have one item and it is the final result
     if len(results_stack) != 1: 
-        print ("ERROR: results_stack. Please check valid query") # check for errors
+        print("ERROR: results_stack. Please check valid query")  # check for errors
     
     return sorted(results_stack.pop())
 
@@ -97,7 +94,7 @@ def shunting_yard(infix_tokens):
     precedence['('] = 0
     precedence[')'] = 0    
 
-    # declare data strucures
+    # declare data structures
     output = []
     operator_stack = []
 
