@@ -3,7 +3,7 @@ import nltk
 import math
 
 
-def calc_balanced_weight(number_occurrence_term_in_doc, number_docs=0, number_docs_with_term=0):
+def calc_balanced_weight(number_occurrence_term_in_doc, number_docs, number_docs_with_term):
     if number_occurrence_term_in_doc == 0:
         return 0
     else:
