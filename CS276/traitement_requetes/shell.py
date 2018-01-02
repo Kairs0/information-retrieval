@@ -20,10 +20,8 @@ def print_usage():
 
 
 def research(type_search, query_string):
-    # if type_search == 'b' or type_search == "boolean":
-    #     return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
-    # elif type_search == 'v' or type_search == "vector":
-    #     return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
+    if type_search == 'b' or type_search == "boolean":
+        return boolean_research.process_query(query_string, dictionary, inverse_index_freq, doc_id_list)
     if type_search == 'v' or type_search == "vector":
         return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
 
@@ -34,10 +32,8 @@ if __name__ == "__main__":
     search_type = None
     query = None
 
-
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'm:tr:', ['model', 't', 'request'])
-        #import pdb; pdb.set_trace()
 
     # if illegal arguments, print usage to user and exit
     except getopt.GetoptError:
@@ -74,7 +70,7 @@ if __name__ == "__main__":
     with open(f'{PATH_FOLDER_JSONS}\list_doc_weight.json', "r") as f4:
         list_doc_weight = json.load(f4)
 
-    # doc_id_list = list_doc_weight.keys()
+    doc_id_list = list_doc_weight.keys()
 
     print(" => Indexes loaded.")
 
