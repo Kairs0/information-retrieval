@@ -203,9 +203,6 @@ if __name__ == "__main__":
     # BSBI, on merge ici !
     print("\n\n=========================================\nStarting BSBI Merging: ")
     merge_blocks_on_disk()
-    # Il faut calculer le poid total de chaque doc ici pour pouvoir faire la recherche vectoriel.
-    # Attention le fichier doc_vecs est très lourd, le prendre comme un stream est une bonne idée, (quitte à le parcourir plusieurs fois)
-    # import pdb; pdb.set_trace()
 
     # Generation fichier docs_weights
     print("\n\n=========================================\nStarting generation of weight per doc")
