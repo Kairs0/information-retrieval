@@ -3,7 +3,53 @@ from collections import Counter, OrderedDict
 import nltk
 
 
-def process_query(query, dictionary, inverse_index_freq):
+def calc_balanced_weight(number_occurrence_term_in_doc, number_docs, number_docs_with_term):
+    if number_occurrence_term_in_doc == 0:
+        return 0
+    else:
+        log_freq = math.log(number_occurrence_term_in_doc, 10)
+        term_inverse_frequency = math.log(number_docs/number_docs_with_term, 10)
+        return round((1 + log_freq)*term_inverse_frequency, 10)
+
+
+def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
+    """
+    https://en.wikipedia.org/wiki/Vector_space_model#Example:_tf-idf_weights
+    """
+    dictionary = OrderedDict(dictionary)
+    stemmer = nltk.stem.SnowballStemmer("english")  # instantiate stemmer
+    query_words = Counter(map(stemmer.stem, query.split()))
+
+    relevant_doc_list = set()
+    scores = Counter()
+
+    number_docs_total = len(list_doc_weight)
+
+    request_weight = 0
+
+    for word, freq in query_words.items():
+        try:
+            id_word = dictionary[word]
+            documents_freq_for_term = Counter(inverse_index_freq[str(id_word)])
+            nbr_docs_with_terms = len(documents_freq_for_term)
+            weight_term_request = calc_balanced_weight(freq, number_docs_total, nbr_docs_with_terms)
+            request_weight += weight_term_request
+            for doc_id in documents_freq_for_term:
+                relevant_doc_list.add(doc_id)
+                scores[doc_id] += \
+                    calc_balanced_weight(documents_freq_for_term[doc_id], number_docs_total, nbr_docs_with_terms) * \
+                    weight_term_request
+        except KeyError:
+            pass
+
+    for doc_id in relevant_doc_list:
+        doc_weight = list_doc_weight[str(doc_id)]
+        scores[doc_id] = scores[doc_id]/(doc_weight*request_weight)
+
+    return scores.most_common(3)
+
+
+def process_query_simple(query, dictionary, inverse_index_freq):
     dictionary = OrderedDict(dictionary)
     scores = Counter()
     stemmer = nltk.stem.SnowballStemmer("english")
@@ -21,13 +67,6 @@ def process_query(query, dictionary, inverse_index_freq):
     for document in scores:
         scores[document] = scores[document] / doc_numbers
     return scores.most_common(3)
-
-
-def calc_balanced_weight(number_occurrence):
-    if number_occurrence == 0:
-        return 0
-    else:
-        return 1 + round(math.log(number_occurrence, 10), 5)
 
 
 def process_query_old(query, dictionary, inverse_index_freq, list_doc_weight):
