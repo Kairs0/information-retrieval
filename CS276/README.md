@@ -24,4 +24,11 @@ CS276
 Depuis le dossier indexation, executer le script mp_indexation_cs276.py
 
 ## Execution des requêtes
-TODO
+
+```
+python shell.py -m <b|v> [-t]
+```
+
+#### Arguments : 
+-m --model      : research model chosen for the search. ['b','boolean', 'v', 'vector']
+-t              : enable the time record.
