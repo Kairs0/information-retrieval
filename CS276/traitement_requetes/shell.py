@@ -21,9 +21,9 @@ def print_usage():
 
 def research(type_search, query_string):
     if type_search == 'b' or type_search == "boolean":
-        return boolean_research.process_query(query_string, dictionary, inverse_index_freq, doc_id_list)
+        return boolean_research.process_query(query_string, dictionary, inverse_index, doc_id_list)
     if type_search == 'v' or type_search == "vector":
-        return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
+        return vector_research.process_query(query_string, dictionary, inverse_index, list_doc_weight)
 
 
 if __name__ == "__main__":
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     #     inverse_index_simple = json.load(f2)
 
     with open(f'{PATH_FOLDER_JSONS}\posting_list_complete.json', "r") as f3:
-        inverse_index_freq = json.load(f3)
+        inverse_index = json.load(f3)
 
     with open(f'{PATH_FOLDER_JSONS}\list_doc_weight.json', "r") as f4:
         list_doc_weight = json.load(f4)

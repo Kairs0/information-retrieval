@@ -10,6 +10,8 @@ PATH_DICTIONARY = r'..\fichiers_traitements\dictionary.json'
 PATH_INVERTED_INDEX_SIMPLE = r'..\fichiers_traitements\inverse_index_simple.json'
 PATH_INVERTED_INDEX_FREQ = r'..\fichiers_traitements\inverse_index_freq.json'
 PATH_LIST_DOC_WEIGHT = r'..\fichiers_traitements\list_doc_weight.json'
+PATH_QUERY_LIST = r'..\collection_data\query.text'
+PATH_RESULT_LIST = r'..\collection_data\qrels.text'
 
 
 def print_usage():
@@ -18,27 +20,82 @@ def print_usage():
     """
     print("usage: " + sys.argv[0] + " -m model | -t")
     print("Options and arguments:")
-    print("-m --model\t: research model chosen for the search. ['b','boolean', 'v', 'vector', 'v2', 'vector v2']")
+    print("-m --model\t: research model. ['b','boolean', 'v', 'vector', 'v2', 'vector v2']")
     print("-t\t\t: enable the time record.")
-    # print("-r --request\t: request (main argument).")
+    print("-e --eval\t: run evalution.")
 
 
-def research(type_search, query_string):
-    if type_search == 'b' or type_search == "boolean":
+def research(search_type, query_string):
+    """
+    Basic search function, called with a search_type (or search model)
+    and a query (a string).
+    """
+    if search_type == 'b' or search_type == "boolean":
         return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
-    elif type_search == 'v2':
+    elif search_type == 'v2':
         return vector_research.process_query_v2(query_string, dictionary, inverse_index_freq, list_doc_weight)
-    elif type_search == 'v' or type_search == "vector":
+    elif search_type == 'v' or search_type == "vector":
         return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
 
+def calc_queries():
+    """
+    Return the list of the test queries.
+    The differents blocks are concatenated.
+    """
+    with open(PATH_QUERY_LIST, "r") as file:
+        content = file.read()
+    raw_queries = content.split("\n.I")
+
+    query_list = []
+    for raw_query in raw_queries:
+        query = ""
+        blocks = raw_query.split("\n.")
+        for block in blocks:
+            query += block[1:]
+        query_list.append(query)
+
+    return query_list
+
+def calc_result():
+    """
+    Return the dict of the test queries' result.
+    k, v = query_id, [(results)]
+    The differents results for a query form a list.
+    """
+    with open(PATH_RESULT_LIST, "r") as file:
+        content = file.read() #TODO Faire le parsing de ce fichier
+    raw_results = content.split("\n")
+
+    results = {}
+    for raw_result in raw_results:
+        elems = raw_result.split()
+        if int(elems[0]) not in results:
+            results[int(elems[0])] = [int(elems[1])]
+        else:
+            results[int(elems[0])].append(int(elems[1]))
+    return results
+
+def evaluate(search_type):
+    """
+    Fonction utiliser pour évalution notre modèle de recherche de documents !
+    """
+    query_list = calc_queries()
+    results = calc_result()
+
+    for i, query in enumerate(query_list):
+        print(research(search_type, query))
+        try:
+            print(results[i+1])
+        except KeyError:
+            print("No results known.")
 
 if __name__ == "__main__":
     RECORD_TIME = False
-    search_type = None
-    query = None
+    SEARCH_TYPE = None
+    EVALUATION = False
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'm:tr:', ['model', 't', 'request'])
+        opts, args = getopt.getopt(sys.argv[1:], 'm:te', ['model', 't', 'eval'])
         # import pdb; pdb.set_trace()
 
     # if illegal arguments, print usage to user and exit
@@ -49,15 +106,15 @@ if __name__ == "__main__":
     # for each option parsed
     for o, a in opts:
         if o == '-m' or o == '--model':
-            search_type = a
+            SEARCH_TYPE = a
         elif o == '-t' or o == '--time':
             RECORD_TIME = True
-        # elif o == '-r' or o == '--request':
-        #     query = a
+        elif o == '-e' or o == '--eval':
+            EVALUATION = True
         else:
             assert False, "unhandled option"
 
-    if search_type is None:
+    if SEARCH_TYPE is None:
         print_usage()
         sys.exit(2)
 
@@ -81,6 +138,13 @@ if __name__ == "__main__":
     print(" => Indexes loaded.")
 
     while shell_open:
+
+        if EVALUATION:
+            print(f"Evaluation of the model {SEARCH_TYPE}")
+            evaluate(SEARCH_TYPE)
+            shell_open = False
+            continue
+
         str_query = input(">> ")
         if str_query == "exit()":
             shell_open = False
@@ -88,9 +152,9 @@ if __name__ == "__main__":
             if RECORD_TIME:
                 start = timeit.default_timer()                                      # start time
 
-            print(research(search_type, str_query))
+            print(research(SEARCH_TYPE, str_query))
 
             if RECORD_TIME:
                 stop = timeit.default_timer()                                       # stop time
             if RECORD_TIME:
-                print('Query time: ' + str(round(stop - start, 3) * 10e3) + ' ms')      # print time taken
+                print('Query time: ' + str(round(stop - start, 3) * 10e3) + ' ms')  # print time

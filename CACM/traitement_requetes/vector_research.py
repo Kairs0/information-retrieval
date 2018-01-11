@@ -1,7 +1,12 @@
-from collections import Counter, OrderedDict
-import nltk
 import math
+from collections import Counter, OrderedDict, deque
+import string
+import nltk
 
+PATH_COMMON_WORDS = r'../collection_data/common_words'
+STEMMER = nltk.stem.SnowballStemmer("english")
+with open(PATH_COMMON_WORDS) as COMMON_WORDS_FILE:
+    COMMON_WORDS_LIST = list(map(STEMMER.stem, COMMON_WORDS_FILE.read().split("\n")))
 
 def calc_balanced_weight(number_occurrence_term_in_doc, number_docs, number_docs_with_term):
     if number_occurrence_term_in_doc == 0:
@@ -11,6 +16,23 @@ def calc_balanced_weight(number_occurrence_term_in_doc, number_docs, number_docs
         term_inverse_frequency = math.log(number_docs/number_docs_with_term, 10)
         return round((1 + log_freq)*term_inverse_frequency, 10)
 
+def query_to_words(query):
+    """
+    Same treatements on the query as on the tokens in the collection
+    """
+    TR = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
+
+    output = deque()
+    query = query.translate(TR) # Strip punctuation
+    for token in nltk.word_tokenize(query):
+        token = token.lower()
+        if len(token) == 1:
+            continue
+        stemmed_word = STEMMER.stem(token)
+        if stemmed_word in COMMON_WORDS_LIST:
+            continue
+        output.append(stemmed_word)
+    return output
 
 def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
     """
@@ -18,8 +40,7 @@ def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
     https://en.wikipedia.org/wiki/Vector_space_model#Example:_tf-idf_weights
     """
     dictionary = OrderedDict(dictionary)
-    stemmer = nltk.stem.SnowballStemmer("english")  # instantiate stemmer
-    query_words = Counter(map(stemmer.stem, query.split()))
+    query_words = Counter(query_to_words(query))
 
     relevant_doc_list = set()
     scores = Counter()
@@ -51,10 +72,12 @@ def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
 
 
 def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
+    """
+    Made by Silvestre, pondération hasardeuse
+    """
     dictionary = OrderedDict(dictionary)
     number_docs = len(list_doc_weight)
-    stemmer = nltk.stem.SnowballStemmer("english")  # instantiate stemmer
-    query_words = Counter(map(stemmer.stem, query.split()))
+    query_words = Counter(query_to_words(query))
     request_weight = sum(query_words.values())
 
     relevant_doc_list = set()  # List of all documents containing at least one word of the search
@@ -78,35 +101,6 @@ def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
 
     for doc_id in relevant_doc_list:
         doc_weight = list_doc_weight[str(doc_id)]
-        # import pdb; pdb.set_trace()
-        # print("doc_id: ", doc_id, ", nn_score: ", scores[doc_id], ", doc_weight: ", doc_weight)
         scores[doc_id] = scores[doc_id]/(doc_weight*request_weight)
-
-    return scores.most_common(3)
-
-def process_query_useless(query, dictionary, inverse_index_freq):
-    """
-    Implementation (plus simple) algo stanford.edu sans utiliser le poids total
-    https://nlp.stanford.edu/IR-book/html/htmledition/computing-vector-scores-1.html
-    Avec pondération tf-idf pour le poids au lieu de la somme du nb d'occurence
-    """
-    dictionary = OrderedDict(dictionary)
-    scores = Counter()
-    stemmer = nltk.stem.SnowballStemmer("english")
-    query_words = Counter(map(stemmer.stem, query.split()))
-    request_weight = sum(map(calc_balanced_weight, query_words.values()))
-    for term in query_words:
-        try:
-            term_id = dictionary[term]
-            posting_list = inverse_index_freq[str(term_id)]
-            for doc_id, freq in posting_list.items():
-                scores[doc_id] += calc_balanced_weight(int(freq)) * request_weight
-        except KeyError:
-            # case user searches for a word not present in our collection
-            pass
-
-    doc_numbers = len(scores)
-    for document in scores:
-        scores[document] = scores[document] / doc_numbers
 
     return scores.most_common(3)
