@@ -1,7 +1,7 @@
 from collections import OrderedDict, Counter, deque
 import glob
 import string
-import ctypes
+# import cProfile
 import nltk
 from nltk.stem import SnowballStemmer
 
@@ -37,7 +37,7 @@ class MpBlock(object):
 
     def create_posting_list(self):
         mapper = MapDoubleReduce(
-            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=4)  # Quad-core assumed
+            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=4)  # Quad-core
         posting_list, doc_vecs = mapper(self.input_files, chunksize=2450)
         # Finally
         posting_list = self.update_pl_with_id(posting_list)
@@ -45,7 +45,11 @@ class MpBlock(object):
         self.posting_list = OrderedDict(sorted(posting_list, key=lambda x: x[0]))
         self.update_documents_with_dv(OrderedDict(doc_vecs))
 
+
     def file_to_words(self, filetuple):
+        """
+        Map function
+        """
         stemmer = SnowballStemmer("english")
         common_words_list = self.collection.common_words_list.copy()
 
@@ -56,26 +60,46 @@ class MpBlock(object):
         doc_id, filename = filetuple
         with open(filename, 'rt') as file:
             content = file.read()
-            content = content.translate(TR) # Strip punctuation
-            for token in nltk.word_tokenize(content):
-                token = token.lower()
-                if len(token) == 1:
-                    continue
-                stemmed_word = stemmer.stem(token)
-                if stemmed_word in common_words_list:
-                    continue
-                output.append((stemmed_word, doc_id))
+        content = content.translate(TR) # Strip punctuation
+        for token in nltk.word_tokenize(content):
+            token = token.lower()
+            if len(token) == 1:
+                continue
+            stemmed_word = stemmer.stem(token)
+            if stemmed_word in common_words_list:
+                continue
+            output.append((stemmed_word, doc_id))
         return output
 
+    """
+    # Map function profile
+    def file_to_words_profile(self, filetuple):
+        if filetuple[0] % 101 == 0:
+            cProfile.runctx('self.file_to_words(filetuple)', globals(), locals(), 'prof%d.prof' %filetuple[0])
+        else:
+            self.file_to_words(filetuple)
+    """
+
+
     def count_words(self, item):
+        """
+        Reduce Function 1
+        """
         stemmed_word, doc_id_list = item
         return (stemmed_word, OrderedDict(sorted(Counter(doc_id_list).items(), key=lambda x: x[0])))
 
+
     def calc_doc_vec(self, item):
+        """
+        Reduce Function 2
+        """
         doc_id, stemmed_word_list = item
         return (doc_id, OrderedDict(sorted(Counter(stemmed_word_list).items(), key=lambda x: x[0])))
 
     def update_pl_with_id(self, posting_list):
+        """
+        We update the incomplete posting list with the term id !
+        """
         # Dictionary update here
         dictionary = dict(self.collection.dictionary.copy())
         incremental_id = max(dictionary.values(), default=0)
@@ -90,8 +114,11 @@ class MpBlock(object):
             posting_list[i] = (word_id, pl_tuple[1])
         self.collection.dictionary = OrderedDict(sorted(dictionary.items(), key=lambda x: x[0]))
         return posting_list
-    
+
     def update_dv_with_id(self, doc_vecs):
+        """
+        We update the documents vectors with the term id !
+        """
         # Dictionary update here
         dictionary = self.collection.dictionary
         for i, dv_tuple in enumerate(doc_vecs):
@@ -105,6 +132,9 @@ class MpBlock(object):
         return doc_vecs
 
     def update_documents_with_dv(self, doc_vecs):
+        """
+        We update the document instances with their own vectors!
+        """
         for i, doc in enumerate(self.documents):
             try:
                 doc.vector = doc_vecs[doc.doc_id]
