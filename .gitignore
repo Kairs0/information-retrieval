@@ -9,7 +9,7 @@ CACM/questions_prealables/__pycache__/*
 CACM/traitement_requetes/__pycache__/*
 
 CS276/traitement_requetes/__pycache__/*
-CS276/fichiers_traitements/*
+#CS276/fichiers_traitements/*
 CS276/collection_data/*
 # ignore collection_data content except common_words
 !CS276/collection_data/common_words
