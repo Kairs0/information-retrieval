@@ -37,24 +37,31 @@ def research(search_type, query_string):
     elif search_type == 'v' or search_type == "vector":
         return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
 
+
 def calc_queries():
     """
     Return the list of the test queries.
-    The differents blocks are concatenated.
+    For each query, the different blocks are concatenated.
     """
     with open(PATH_QUERY_LIST, "r") as file:
         content = file.read()
-    raw_queries = content.split("\n.I")
 
+    unclean_queries = content.split(".I")
     query_list = []
-    for raw_query in raw_queries:
-        query = ""
-        blocks = raw_query.split("\n.")
-        for block in blocks:
-            query += block[1:]
-        query_list.append(query)
+    for unclean_query in unclean_queries:
+        if not unclean_query.__contains__(".W"):
+            continue
+
+        unclean_blocks = unclean_query.split(".N")
+        clear_first_part = unclean_blocks[0].replace(".W\n", "")[3:]
+        clear_second_part = unclean_blocks[1][4:]
+        query_list.append(
+            "".join([clear_first_part.replace("\n", " "),
+                     clear_second_part.replace("\n", " ")])
+        )
 
     return query_list
+
 
 def calc_result():
     """
@@ -63,7 +70,7 @@ def calc_result():
     The differents results for a query form a list.
     """
     with open(PATH_RESULT_LIST, "r") as file:
-        content = file.read() #TODO Faire le parsing de ce fichier
+        content = file.read()  #TODO Faire le parsing de ce fichier
     raw_results = content.split("\n")
 
     results = {}
@@ -75,9 +82,10 @@ def calc_result():
             results[int(elems[0])].append(int(elems[1]))
     return results
 
+
 def evaluate(search_type):
     """
-    Fonction utiliser pour évalution notre modèle de recherche de documents !
+    Fonction utilisée pour l'évalution de notre modèle de recherche de documents
     """
     query_list = calc_queries()
     results = calc_result()
@@ -87,7 +95,8 @@ def evaluate(search_type):
         try:
             print(results[i+1])
         except KeyError:
-            print("No results known.")
+            print("No relevant result provided for this request.")
+
 
 if __name__ == "__main__":
     RECORD_TIME = False
@@ -96,7 +105,6 @@ if __name__ == "__main__":
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'm:te', ['model', 't', 'eval'])
-        # import pdb; pdb.set_trace()
 
     # if illegal arguments, print usage to user and exit
     except getopt.GetoptError:
