@@ -34,7 +34,8 @@ def query_to_words(query):
         output.append(stemmed_word)
     return output
 
-def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
+
+def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected):
     """
     Same implementation mais avec pondération de la fréquence
     https://en.wikipedia.org/wiki/Vector_space_model#Example:_tf-idf_weights
@@ -68,10 +69,10 @@ def process_query_v2(query, dictionary, inverse_index_freq, list_doc_weight):
         doc_weight = list_doc_weight[str(doc_id)]
         scores[doc_id] = scores[doc_id]/(doc_weight*request_weight)
 
-    return scores.most_common(3)
+    return scores.most_common(number_doc_expected)
 
 
-def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
+def process_query(query, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected):
     """
     Made by Silvestre, pondération hasardeuse
     """
@@ -103,4 +104,4 @@ def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
         doc_weight = list_doc_weight[str(doc_id)]
         scores[doc_id] = scores[doc_id]/(doc_weight*request_weight)
 
-    return scores.most_common(3)
+    return scores.most_common(number_doc_expected)
