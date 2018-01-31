@@ -20,7 +20,7 @@ def print_usage():
     """
     print("usage: " + sys.argv[0] + " -m model | -t")
     print("Options and arguments:")
-    print("-m --model\t: research model. ['b','boolean', 'v', 'vector', 'v2', 'vector v2']")
+    print("-m --model\t: research model. ['b','boolean', 'v', 'vector']")
     print("-t\t\t: enable the time record.")
     print("-e --eval\t: run evalution.")
 
