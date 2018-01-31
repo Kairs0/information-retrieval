@@ -4,6 +4,7 @@ import getopt
 import timeit
 import boolean_research
 import vector_research
+import matplotlib.pyplot as plot
 
 PATH_COLLECTION = r'../collection_data/cacm.all'
 PATH_DICTIONARY = r'../fichiers_traitements/dictionary.json'
@@ -25,7 +26,7 @@ def print_usage():
     print("-e --eval\t: run evalution.")
 
 
-def research(search_type, query_string):
+def research(search_type, query_string, number_doc_expected=3):
     """
     Basic search function, called with a search_type (or search model)
     and a query (a string).
@@ -33,28 +34,35 @@ def research(search_type, query_string):
     if search_type == 'b' or search_type == "boolean":
         return boolean_research.process_query(query_string, dictionary, simple_posting_list, doc_id_list)
     elif search_type == 'v2':
-        return vector_research.process_query_v2(query_string, dictionary, posting_list, list_doc_weight)
+        return vector_research.process_query_v2(query_string, dictionary, posting_list, list_doc_weight, number_doc_expected)
     elif search_type == 'v' or search_type == "vector":
-        return vector_research.process_query(query_string, dictionary, posting_list, list_doc_weight)
+        return vector_research.process_query(query_string, dictionary, posting_list, list_doc_weight, number_doc_expected)
+
 
 def calc_queries():
     """
     Return the list of the test queries.
-    The differents blocks are concatenated.
+    For each query, the different blocks are concatenated.
     """
     with open(PATH_QUERY_LIST, "r") as file:
         content = file.read()
-    raw_queries = content.split("\n.I")
 
+    unclean_queries = content.split(".I")
     query_list = []
-    for raw_query in raw_queries:
-        query = ""
-        blocks = raw_query.split("\n.")
-        for block in blocks:
-            query += block[1:]
-        query_list.append(query)
+    for unclean_query in unclean_queries:
+        if not unclean_query.__contains__(".W"):
+            continue
+
+        unclean_blocks = unclean_query.split(".N")
+        clear_first_part = unclean_blocks[0].replace(".W\n", "")[3:]
+        clear_second_part = unclean_blocks[1][4:]
+        query_list.append(
+            "".join([clear_first_part.replace("\n", " "),
+                     clear_second_part.replace("\n", " ")])
+        )
 
     return query_list
+
 
 def calc_result():
     """
@@ -63,7 +71,7 @@ def calc_result():
     The differents results for a query form a list.
     """
     with open(PATH_RESULT_LIST, "r") as file:
-        content = file.read() #TODO Faire le parsing de ce fichier
+        content = file.read()  #TODO Faire le parsing de ce fichier
     raw_results = content.split("\n")
 
     results = {}
@@ -75,19 +83,65 @@ def calc_result():
             results[int(elems[0])].append(int(elems[1]))
     return results
 
+
 def evaluate(search_type):
     """
-    Fonction utiliser pour évalution notre modèle de recherche de documents !
+    Fonction utilisée pour l'évalution de notre modèle de recherche de documents
     """
     query_list = calc_queries()
     results = calc_result()
 
+    eval_recall = []
+    eval_precision = []
+
+    count_key_error = 0
+    count_division_error = 0
+
     for i, query in enumerate(query_list):
-        print(research(search_type, query))
         try:
-            print(results[i+1])
+            expected = results[i + 1]
+
+            if search_type == "b" or search_type == "boolean":
+                result_request = research(search_type, query)
+            else:
+                result_request = research(search_type, query, 3)
+
+            relevant_obtained = []
+            for result in result_request:
+                index = int(result[0])
+                if index in expected:
+                    relevant_obtained.append(int(result[0]))
+
+            recall = len(relevant_obtained) / len(expected)
+            precision = len(relevant_obtained) / len(result_request)
+
+            eval_recall.append(recall)
+            eval_precision.append(precision)
+            # print("Recall for this request: " + str(recall))
+            # print("Precision for this request: " + str(precision))
+
         except KeyError:
-            print("No results known.")
+            # print("No relevant result has been provided for this request.")
+            count_key_error += 1
+        except ZeroDivisionError:
+            # print("No result obtained for this request")
+            count_division_error += 1
+
+    # print("Values eval_recall:")
+    # print(sorted(eval_recall)[::-1])
+    #
+    # print("Values eval_precision:")
+    # print(sorted(eval_precision)[::-1])
+
+    plot.plot(
+        sorted([value for value in eval_recall if value != 0])[::-1],
+        sorted([value for value in eval_precision if value != 0])
+    )
+    plot.xlabel('Recall')
+    plot.ylabel('Precision')
+    plot.title('Recall/Precision graph')
+    plot.show()
+
 
 if __name__ == "__main__":
     RECORD_TIME = False
@@ -96,7 +150,6 @@ if __name__ == "__main__":
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'm:te', ['model', 't', 'eval'])
-        # import pdb; pdb.set_trace()
 
     # if illegal arguments, print usage to user and exit
     except getopt.GetoptError:

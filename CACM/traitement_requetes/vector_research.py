@@ -41,7 +41,7 @@ def query_to_words(query):
         output.append(stemmed_word)
     return output
 
-def process_query(query, dictionary, posting_list, list_doc_weight):
+def process_query(query, dictionary, posting_list, list_doc_weight, number_doc_expected):
     """
     Main function of the module.
 
@@ -80,4 +80,4 @@ def process_query(query, dictionary, posting_list, list_doc_weight):
         doc_weight = list_doc_weight[str(doc_id)]
         scores[doc_id] = scores[doc_id]/(doc_weight*request_weight)
 
-    return scores.most_common(3)
+    return scores.most_common(number_doc_expected)
