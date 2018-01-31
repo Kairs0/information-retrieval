@@ -1,10 +1,21 @@
+"""
+This module implements the Block object.
+
+The key method of this object is 'create_posting_list'
+This method requires three other methods to instantiate the MapDoubleReduce object:
+    - file_to_words
+    - count_words
+    - calc_doc_vecs
+
+Other methods of Block class are used either before or after the MapReduce process.
+"""
 from collections import OrderedDict, Counter, deque
 import glob
 import string
 from nltk.stem import SnowballStemmer
 
-from simplemapreduce import MapDoubleReduce
-from mpdocument import Document
+from mapreduce import MapDoubleReduce
+from document import Document
 
 
 class Block(object):
@@ -43,9 +54,9 @@ class Block(object):
         Main function
 
         Instanciate the MapDoubleReduce class with :
-            - map function      := file_to_words
-            - reduce function 1 := count_words
-            - reduce function 2 := calc_doc_vec
+            - map function      : file_to_words
+            - reduce function 1 : count_words
+            - reduce function 2 : calc_doc_vec
         Then launch it.
 
         After the MapReduce ends, this function update :

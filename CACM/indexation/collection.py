@@ -86,31 +86,18 @@ class Collection:
         return posting_list, OrderedDict(sorted(dictionary.items(), key=lambda x: x[0]))
 
     """
-    From the complete posting list, create a simpler one, without frequency :
-    key = (int) termID
-    value = (list) (int) docs ids 
-    """
-    @staticmethod
-    def create_simple_posting_list(posting_list):
-        inverted_index = defaultdict(list)
-        for term_id in posting_list.keys():
-            documents_ids = list(posting_list[term_id].keys())
-            inverted_index[term_id] = documents_ids
-        return inverted_index
-
-    """
     From the inverted index, compute the "total weight" of each documents
     (used in vector research).
     key: (int) 
     """
-    def create_doc_weights(self, inverted_index):
+    def create_doc_weights(self, posting_list):
         # We may need to use the Decimal type
         doc_weights = defaultdict(float)
         for document in self.documents:
             total_doc_weight = 0
             # Calculates a total weight for each document.
             for term_id, freq in document.vocabulary.items():
-                total_doc_weight += freq*len(self.documents)/len(inverted_index[term_id])
+                total_doc_weight += freq*len(self.documents)/len(posting_list[term_id].keys())
             doc_weights[document.doc_id] = float("{0:.2f}".format(total_doc_weight))
 
         return doc_weights

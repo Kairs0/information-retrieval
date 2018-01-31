@@ -1,6 +1,12 @@
 """
+This module implements our custom MapReduce framework,
+we decided to stock both the index {doc: {term: frequency}}
+and the posting_list {term: {doc: frequency}}
+
+So we need two partitions of map function results and two 'reduce functions'. 
+
 Source : https://pymotw.com/2/multiprocessing/mapreduce.html
-Double reduce function
+Strongly changed
 """
 import collections
 import itertools

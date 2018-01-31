@@ -8,8 +8,7 @@ import matplotlib.pyplot as plot
 
 PATH_COLLECTION = r'../collection_data/cacm.all'
 PATH_DICTIONARY = r'../fichiers_traitements/dictionary.json'
-PATH_SIMPLE_POSTING_LIST = r'../fichiers_traitements/simple_posting_list.json'
-PATH_COMPLETE_POSTING_LIST = r'../fichiers_traitements/complete_posting_list.json'
+PATH_COMPLETE_POSTING_LIST = r'../fichiers_traitements/posting_list.json'
 PATH_LIST_DOC_WEIGHT = r'../fichiers_traitements/list_doc_weight.json'
 PATH_QUERY_LIST = r'../collection_data/query.text'
 PATH_RESULT_LIST = r'../collection_data/qrels.text'
@@ -32,11 +31,9 @@ def research(search_type, query_string, number_doc_expected=3):
     and a query (a string).
     """
     if search_type == 'b' or search_type == "boolean":
-        return boolean_research.process_query(query_string, dictionary, simple_posting_list, doc_id_list)
-    elif search_type == 'v2':
-        return vector_research.process_query_v2(query_string, dictionary, posting_list, list_doc_weight, number_doc_expected)
+        return boolean_research.process_query(query_string, dictionary, posting_list, doc_id_list)
     elif search_type == 'v' or search_type == "vector":
-        return vector_research.process_query(query_string, dictionary, posting_list, list_doc_weight, number_doc_expected)
+        return vector_research.process_query(query_string, dictionary, posting_list, doc_weights, number_doc_expected)
 
 
 def calc_queries():
@@ -71,7 +68,7 @@ def calc_result():
     The differents results for a query form a list.
     """
     with open(PATH_RESULT_LIST, "r") as file:
-        content = file.read()  #TODO Faire le parsing de ce fichier
+        content = file.read()
     raw_results = content.split("\n")
 
     results = {}
@@ -177,16 +174,13 @@ if __name__ == "__main__":
     with open(PATH_DICTIONARY, "r") as f:
         dictionary = json.load(f)
 
-    with open(PATH_SIMPLE_POSTING_LIST, "r") as f2:
-        simple_posting_list = json.load(f2)
-
     with open(PATH_COMPLETE_POSTING_LIST, "r") as f3:
         posting_list = json.load(f3)
 
     with open(PATH_LIST_DOC_WEIGHT, "r") as f4:
-        list_doc_weight = json.load(f4)
+        doc_weights = json.load(f4)
 
-    doc_id_list = list_doc_weight.keys()
+    doc_id_list = doc_weights.keys()
 
     print(" => Indexes loaded.")
 

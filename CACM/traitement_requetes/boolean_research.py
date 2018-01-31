@@ -25,7 +25,7 @@ def simple_request(term):
         return term
 
     try:
-        return POSTING_LIST[str(DICTIONARY[term])]
+        return list(POSTING_LIST[str(DICTIONARY[term])].keys())
     except KeyError:
         return list()
 
@@ -36,7 +36,7 @@ def process_query(query, dictionary, posting_list, doc_id_list):
 
     :param query (string) : 'bill OR Gates AND (vista OR XP) AND NOT mac'
     :param dictionary,
-    :param posting_list (simple_posting_list see ./indexation/main.py)
+    :param posting_list (posting_list see ./../indexation/main.py)
     :param doc_id_list (list): list of every doc id of the collection
     :return result : list of doc_id matching the query.
 
@@ -95,7 +95,7 @@ def process_query(query, dictionary, posting_list, doc_id_list):
     if len(results_stack) != 1:
         print("ERROR: results_stack. Please check valid query") # check for errors
 
-    return sorted(results_stack.pop())
+    return sorted(results_stack.pop(), key=lambda x: int(x))
 
 
 def shunting_yard(infix_tokens):

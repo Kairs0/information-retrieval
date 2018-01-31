@@ -1,3 +1,10 @@
+"""
+This module implements the vector research. The main function is 'process_query'
+which is called by the shell main function.
+
+We use the tf-idf ponderation to find the most relevant documents.
+see: https://en.wikipedia.org/wiki/Vector_space_model#Example:_tf-idf_weights
+"""
 import math
 from collections import Counter, OrderedDict, deque
 import string
@@ -38,7 +45,13 @@ def query_to_words(query):
 
 def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
     """
-    https://en.wikipedia.org/wiki/Vector_space_model#Example:_tf-idf_weights
+    Main function of the module.
+
+    :param query (string): for example, 'bill Gates XP'
+    :param dictionary
+    :param posting_list (complete_posting_list, see ./indexation/main.py)
+    :param list_doc_weight
+    :return result: list of doc_id matching the query
     """
     dictionary = OrderedDict(dictionary)
     query_words = Counter(query_to_words(query))
@@ -62,41 +75,6 @@ def process_query(query, dictionary, inverse_index_freq, list_doc_weight):
                 scores[doc_id] += \
                     calc_balanced_weight(documents_freq_for_term[doc_id], number_docs_total, nbr_docs_with_terms) * \
                     weight_term_request
-        except KeyError:
-            pass
-
-    for doc_id in relevant_doc_list:
-        doc_weight = list_doc_weight[str(doc_id)]
-        scores[doc_id] = scores[doc_id]/(doc_weight*request_weight)
-
-    return scores.most_common(3)
-
-
-def process_query_old(query, dictionary, inverse_index_freq, list_doc_weight):
-    """
-    Made by Silvestre, pondération hasardeuse
-    """
-    dictionary = OrderedDict(dictionary)
-
-    docs_number = len(list_doc_weight)
-    words = Counter(query_to_words(query))
-    request_weight = sum(words.values())
-
-    relevant_doc_list = set() # List of all documents containing at least one word of the search
-    scores = Counter()
-
-    for word, freq in words.items():
-        term_request_weight = freq
-        try:
-            word_id = dictionary[word]
-            # import pdb; pdb.set_trace()
-            posting_list = Counter(inverse_index_freq[str(word_id)])
-            for doc_id in posting_list:
-                relevant_doc_list.add(doc_id)
-                term_frequency = posting_list[str(doc_id)]
-                term_doc_weight = term_frequency*(docs_number/len(posting_list))
-                scores[doc_id] += term_request_weight * term_doc_weight
-                # print("word_id: ", word_id, "doc_id: ", doc_id, ", score: ", scores[doc_id])
         except KeyError:
             pass
 

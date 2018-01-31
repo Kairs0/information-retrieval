@@ -56,7 +56,7 @@ def index_block(collection, block_i):
     """
     inter_time = time.time()
 
-    block = collection.create_mpblock(block_i)
+    block = collection.create_block(block_i)
     block.create_docs()
     print(f"Block {block_i}: ", end='\n\t')
 

@@ -1,11 +1,10 @@
 import json
 import time
-from indexation.collection import Collection
+from collection import Collection
 
 PATH_COLLECTION = r'../collection_data/cacm.all'
 PATH_DICTIONARY = r'../fichiers_traitements/dictionary.json'
-PATH_SIMPLE_POSTING_LIST = r'../fichiers_traitements/inverse_index_simple.json'
-PATH_COMPLETE_POSTING_LIST = r'../fichiers_traitements/inverse_index_freq.json'
+PATH_POSTING_LIST = r'../fichiers_traitements/posting_list.json'
 PATH_LIST_DOC_WEIGHT = r'../fichiers_traitements/list_doc_weight.json'
 
 
@@ -30,22 +29,15 @@ if __name__ == "__main__":
     posting_list, dictionary = COLLECTION.create_posting_list()
     print("Dictionary + Posting List created : " + str_time())
 
-    # We create a simple posting_list (without frequency in it).
-    simple_posting_list = COLLECTION.create_simple_posting_list(posting_list)
-    print("Inverted index created : " + str_time())
-
     # We compute the total weight of each docs (for vector research).
-    doc_weights = COLLECTION.create_doc_weights(simple_posting_list)
+    doc_weights = COLLECTION.create_doc_weights(posting_list)
     print("Doc Weight table created : " + str_time())
 
     # We write these information on disk.
     with open(PATH_DICTIONARY, 'w') as json_terms:
         json.dump(dictionary, json_terms)
 
-    with open(PATH_SIMPLE_POSTING_LIST, 'w') as json_index:
-        json.dump(simple_posting_list, json_index)
-
-    with open(PATH_COMPLETE_POSTING_LIST, 'w') as json_index_with_freq:
+    with open(PATH_POSTING_LIST, 'w') as json_index_with_freq:
         json.dump(posting_list, json_index_with_freq)
 
     with open(PATH_LIST_DOC_WEIGHT, 'w') as json_weight:
