@@ -1,8 +1,6 @@
 from collections import OrderedDict, Counter, deque
 import glob
 import string
-# import cProfile
-import nltk
 from nltk.stem import SnowballStemmer
 
 from simplemapreduce import MapDoubleReduce
@@ -12,7 +10,6 @@ from mpdocument import Document
 class MpBlock(object):
 
     def __init__(self, collection, path):
-        # manager = Manager()
         self.collection = collection
         self.doc_id = self.collection.doc_id_offset
 
@@ -25,6 +22,12 @@ class MpBlock(object):
         return f'block.Block object. Collection: {self.collection.title}.Path: {self.path}'
 
     def create_docs(self):
+        """
+        This function is called before launching the MapReduce workers.
+
+        It created a Document Instance (with an unique id and the path to the corresponding file)
+        for every files in the block.
+        """
         new_doc_id = self.collection.doc_id_offset
         input_files_tuple = []
         for filename in self.input_files:
@@ -36,8 +39,25 @@ class MpBlock(object):
         self.collection.doc_id_offset = new_doc_id
 
     def create_posting_list(self):
+        """
+        Main function
+
+        Instanciate the MapDoubleReduce class with :
+            - map function      := file_to_words
+            - reduce function 1 := count_words
+            - reduce function 2 := calc_doc_vec
+        Then launch it.
+
+        After the MapReduce ends, this function update :
+            - the dictionary with the new words encountered during the MapReduce
+            - the (current block) posting list with word id (from the dictionary)
+            - the documents' vectors with word id (from the dictionary)
+
+        Eventually, the function reorders the posting list with word id
+        and update the Document objects with their own vectors.
+        """
         mapper = MapDoubleReduce(
-            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=4)  # Quad-core
+            self.file_to_words, self.count_words, self.calc_doc_vec, num_workers=4)
         posting_list, doc_vecs = mapper(self.input_files, chunksize=2450)
         # Finally
         posting_list = self.update_pl_with_id(posting_list)
@@ -49,8 +69,20 @@ class MpBlock(object):
     def file_to_words(self, filetuple):
         """
         Map function
+
+        A Mapper process executes this function.
+
+        First, it opens the file on the disk, load it into the memory, and get a string from it.
+
+        Then, it splits the string, eliminates the one-character long token,
+        stems every tokens, checks if they are in the common_words_list
+
+        Finally it returns a list of tuple (stemmed_word, doc_id) for this doc.
+
+        :param filetuple (tuple) : doc_id, filename (file path)
+        :return: [(tuple)] : stemmed_word, doc_id
         """
-        stemmer = SnowballStemmer("english")
+        stemmer = SnowballStemmer("english", ignore_stopwords=True)
         common_words_list = self.collection.common_words_list.copy()
 
         TR = str.maketrans(string.punctuation, ' ' * len(string.punctuation))
@@ -61,29 +93,23 @@ class MpBlock(object):
         with open(filename, 'rt') as file:
             content = file.read()
         content = content.translate(TR) # Strip punctuation
-        for token in nltk.word_tokenize(content):
-            token = token.lower()
+        for token in content.split():
             if len(token) == 1:
                 continue
-            stemmed_word = stemmer.stem(token)
+            stemmed_word = stemmer.stem(token.lower())
             if stemmed_word in common_words_list:
                 continue
             output.append((stemmed_word, doc_id))
         return output
 
-    """
-    # Map function profile
-    def file_to_words_profile(self, filetuple):
-        if filetuple[0] % 101 == 0:
-            cProfile.runctx('self.file_to_words(filetuple)', globals(), locals(), 'prof%d.prof' %filetuple[0])
-        else:
-            self.file_to_words(filetuple)
-    """
-
-
     def count_words(self, item):
         """
-        Reduce Function 1
+        Reduce function 1
+
+        A Reducer process executes this function.
+
+        :param item (tuple) : stemmed_word, doc_id_list
+        :return: (tuple) : stemmed_word, (dict) K : doc_id, V : occurences in the doc_id_list
         """
         stemmed_word, doc_id_list = item
         return (stemmed_word, OrderedDict(sorted(Counter(doc_id_list).items(), key=lambda x: x[0])))
@@ -91,7 +117,12 @@ class MpBlock(object):
 
     def calc_doc_vec(self, item):
         """
-        Reduce Function 2
+        Reduce function 2
+
+        A Reducer process executes this function.
+
+        :param item (tuple) : doc_id, stemmed_word_list
+        :return: (tuple) : doc_id, (dict) K : stemmed_word, V : occurences in the stemmed_word_list
         """
         doc_id, stemmed_word_list = item
         return (doc_id, OrderedDict(sorted(Counter(stemmed_word_list).items(), key=lambda x: x[0])))

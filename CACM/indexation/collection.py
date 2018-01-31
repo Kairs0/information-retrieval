@@ -1,4 +1,4 @@
-from collections import defaultdict, OrderedDict, Counter
+from collections import defaultdict, OrderedDict
 from nltk.stem import SnowballStemmer
 from document import Document
 
@@ -86,12 +86,12 @@ class Collection:
         return posting_list, OrderedDict(sorted(dictionary.items(), key=lambda x: x[0]))
 
     """
-    From the posting list, creates the inverted index :
+    From the complete posting list, create a simpler one, without frequency :
     key = (int) termID
     value = (list) (int) docs ids 
     """
     @staticmethod
-    def create_inverted_index(posting_list):
+    def create_simple_posting_list(posting_list):
         inverted_index = defaultdict(list)
         for term_id in posting_list.keys():
             documents_ids = list(posting_list[term_id].keys())
@@ -99,22 +99,21 @@ class Collection:
         return inverted_index
 
     """
-    TODO Arnaud comprendre utilité
-    From the inverted index, creates a weighted index for each doc (?)
+    From the inverted index, compute the "total weight" of each documents
+    (used in vector research).
     key: (int) 
     """
-    def create_docID_weight(self, inverted_index):
+    def create_doc_weights(self, inverted_index):
         # We may need to use the Decimal type
-        docID_weight = defaultdict(float)
+        doc_weights = defaultdict(float)
         for document in self.documents:
             total_doc_weight = 0
-            # Calculates a weight for each document.
-            #
+            # Calculates a total weight for each document.
             for term_id, freq in document.vocabulary.items():
                 total_doc_weight += freq*len(self.documents)/len(inverted_index[term_id])
-            docID_weight[document.doc_id] = float("{0:.2f}".format(total_doc_weight))
+            doc_weights[document.doc_id] = float("{0:.2f}".format(total_doc_weight))
 
-        return docID_weight
+        return doc_weights
 
     # USED in question_prealables
     def calc_vocabulary(self, common_words_file):

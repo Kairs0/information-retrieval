@@ -14,8 +14,8 @@ PATH_FOLDER_JSONS = r'..\fichiers_traitements'
 
 def init_indexation():
     with \
-        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'wb') as doc_index_file, \
-            open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'wb') as doc_vecs_file:
+        open(f'{PATH_FOLDER_JSONS}/doc_index.json', 'wb') as doc_index_file, \
+            open(f'{PATH_FOLDER_JSONS}/doc_vecs.json', 'wb') as doc_vecs_file:
 
         doc_index_file.write(b'{')
         doc_vecs_file.write(b'{')
@@ -24,44 +24,42 @@ def init_indexation():
 def index_block(collection, block_i):
     inter_time = time.time()
 
-    with \
-        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'ab') as doc_index_file,\
-        open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'ab') as doc_vecs_file:
+    block = collection.create_mpblock(block_i)
+    block.create_docs()
+    print(f"Block {block_i}: ", end='\n\t')
 
-        block = collection.create_mpblock(block_i)
-        block.create_docs()
-        print(f"Block {block_i}: ", end='\n\t')
+    block.create_posting_list()
+    print("Posting List created : " + str(time.time() - inter_time), end='\n\t')
+    inter_time = time.time()
 
-        print("Posting List creation ... ", end=' ')
-        block.create_posting_list()
-        print("[DONE] : " + str(time.time() - inter_time), end='\n\t')
-        inter_time = time.time()
+    with open(f'{PATH_FOLDER_JSONS}/posting_list_block{block_i}.json', 'w') as json_index:
+        ujson.dump(block.posting_list, json_index)
 
-        with open(f'{PATH_FOLDER_JSONS}\posting_list_block{block_i}.json', 'w') as json_index:
-            ujson.dump(block.posting_list, json_index)
-
-        doc_index = {doc.filename: doc.doc_id for doc in sorted(block.documents, key=lambda x: x.doc_id)}
+    doc_index = {doc.filename: doc.doc_id for doc in sorted(block.documents, key=lambda x: x.doc_id)}
+    with open(f'{PATH_FOLDER_JSONS}/doc_index.json', 'ab') as doc_index_file:
         doc_index_file.write(bytes(ujson.dumps(doc_index), 'utf8')[1:-1] + b',')
 
-        doc_vecs = {doc.doc_id: doc.vector for doc in sorted(block.documents, key=lambda x: x.doc_id)}
+    doc_vecs = {doc.doc_id: doc.vector for doc in sorted(block.documents, key=lambda x: x.doc_id)}
+    with open(f'{PATH_FOLDER_JSONS}/doc_vecs.json', 'ab') as doc_vecs_file:
         doc_vecs_file.write(bytes(ujson.dumps(doc_vecs), 'utf8')[1:-1] + b',')
 
-        del block
-        gc.collect()
-        print(f"Json written, memory released: "+ str(time.time() - inter_time))
+    del block
+    gc.collect()
+    print(f"Json written, memory released: "+ str(time.time() - inter_time))
 
-    with open(f'{PATH_FOLDER_JSONS}\dictionary.json', 'w') as json_index:
+    with open(f'{PATH_FOLDER_JSONS}/dictionary.json', 'w') as json_index:
         ujson.dump(collection.dictionary, json_index)
 
 
 def end_indexation():
     with \
-        open(f'{PATH_FOLDER_JSONS}\doc_index.json', 'r+b') as doc_index_file, \
-            open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', 'r+b') as doc_vecs_file:
+        open(f'{PATH_FOLDER_JSONS}/doc_index.json', 'r+b') as doc_index_file, \
+            open(f'{PATH_FOLDER_JSONS}/doc_vecs.json', 'r+b') as doc_vecs_file:
         doc_index_file.seek(-1, 2)
         doc_vecs_file.seek(-1, 2)
         doc_vecs_file.write(b'}')
         doc_index_file.write(b'}')
+
 
 ##############################################################################
 ############### BSBI MERGE ###################################################
@@ -70,18 +68,19 @@ def end_indexation():
 
 def merge_blocks_on_disk():
     start_time = time.time()
+    print("\n\n=========================================\nStarting BSBI Merging: ")
     with \
-        open(f'{PATH_FOLDER_JSONS}\posting_list_block0.json', mode='rb') as pl0,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block1.json', mode='rb') as pl1,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block2.json', mode='rb') as pl2,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block3.json', mode='rb') as pl3,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block4.json', mode='rb') as pl4,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block5.json', mode='rb') as pl5,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block6.json', mode='rb') as pl6, \
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block7.json', mode='rb') as pl7, \
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block8.json', mode='rb') as pl8,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_block9.json', mode='rb') as pl9,\
-            open(f'{PATH_FOLDER_JSONS}\posting_list_complete.json', mode='wb') as plc_file:
+        open(f'{PATH_FOLDER_JSONS}/posting_list_block0.json', mode='rb') as pl0,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block1.json', mode='rb') as pl1,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block2.json', mode='rb') as pl2,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block3.json', mode='rb') as pl3,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block4.json', mode='rb') as pl4,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block5.json', mode='rb') as pl5,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block6.json', mode='rb') as pl6, \
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block7.json', mode='rb') as pl7, \
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block8.json', mode='rb') as pl8,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_block9.json', mode='rb') as pl9,\
+            open(f'{PATH_FOLDER_JSONS}/posting_list_complete.json', mode='wb') as plc_file:
 
         pl_list = [pl0, pl1, pl2, pl3, pl4, pl5, pl6, pl7, pl8, pl9]    # BufferedReaders' list
         parser_list = [ijson.parse(pl, buf_size=io.DEFAULT_BUFFER_SIZE) for pl in pl_list]
@@ -156,8 +155,9 @@ def merge_blocks_on_disk():
 
 
 def generate_list_weight_docs():
+    print("\n\n=========================================\nStarting generation of weight per doc")
     start_time = time.time()
-    with open(f'{PATH_FOLDER_JSONS}\doc_vecs.json', mode='rb') as vecs_file:
+    with open(f'{PATH_FOLDER_JSONS}/doc_vecs.json', mode='rb') as vecs_file:
         parser = ijson.parse(vecs_file)
         docs_weight_list = defaultdict(int)
         for prefix, event, value in parser:
@@ -169,7 +169,7 @@ def generate_list_weight_docs():
         for key in docs_weight_list:
             docs_weight_list[key] = math.sqrt(docs_weight_list[key])
 
-    with open(f'{PATH_FOLDER_JSONS}\list_doc_weight.json', mode='w') as doc_weight:
+    with open(f'{PATH_FOLDER_JSONS}/list_doc_weight.json', mode='w') as doc_weight:
         ujson.dump(docs_weight_list, doc_weight)
 
     print("List weight docs generated in " + str(round(time.time() - start_time, 2)) + " s")
@@ -184,8 +184,8 @@ if __name__ == "__main__":
     collection = Collection(PATH_COLLECTION, "cs276")
 
     # check si dictionary.json existe pour l'ouvrir(a la premiere lecture ce n'est pas le cas)
-    if os.path.exists(f'{PATH_FOLDER_JSONS}\dictionary.json'):
-        with open(f'{PATH_FOLDER_JSONS}\dictionary.json', 'r') as dictionary_file:
+    if os.path.exists(f'{PATH_FOLDER_JSONS}/dictionary.json'):
+        with open(f'{PATH_FOLDER_JSONS}/dictionary.json', 'r') as dictionary_file:
             collection.dictionary = ujson.load(dictionary_file)
 
     print("[Done]")
@@ -201,9 +201,7 @@ if __name__ == "__main__":
     print(f"All blocks indexed: " + str(time.time() - start_time))
 
     # BSBI, on merge ici !
-    print("\n\n=========================================\nStarting BSBI Merging: ")
     merge_blocks_on_disk()
 
     # Generation fichier docs_weights
-    print("\n\n=========================================\nStarting generation of weight per doc")
     generate_list_weight_docs()

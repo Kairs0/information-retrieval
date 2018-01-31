@@ -5,13 +5,13 @@ import timeit
 import boolean_research
 import vector_research
 
-PATH_COLLECTION = r'..\collection_data\cacm.all'
-PATH_DICTIONARY = r'..\fichiers_traitements\dictionary.json'
-PATH_INVERTED_INDEX_SIMPLE = r'..\fichiers_traitements\inverse_index_simple.json'
-PATH_INVERTED_INDEX_FREQ = r'..\fichiers_traitements\inverse_index_freq.json'
-PATH_LIST_DOC_WEIGHT = r'..\fichiers_traitements\list_doc_weight.json'
-PATH_QUERY_LIST = r'..\collection_data\query.text'
-PATH_RESULT_LIST = r'..\collection_data\qrels.text'
+PATH_COLLECTION = r'../collection_data/cacm.all'
+PATH_DICTIONARY = r'../fichiers_traitements/dictionary.json'
+PATH_SIMPLE_POSTING_LIST = r'../fichiers_traitements/simple_posting_list.json'
+PATH_COMPLETE_POSTING_LIST = r'../fichiers_traitements/complete_posting_list.json'
+PATH_LIST_DOC_WEIGHT = r'../fichiers_traitements/list_doc_weight.json'
+PATH_QUERY_LIST = r'../collection_data/query.text'
+PATH_RESULT_LIST = r'../collection_data/qrels.text'
 
 
 def print_usage():
@@ -31,11 +31,11 @@ def research(search_type, query_string):
     and a query (a string).
     """
     if search_type == 'b' or search_type == "boolean":
-        return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
+        return boolean_research.process_query(query_string, dictionary, simple_posting_list, doc_id_list)
     elif search_type == 'v2':
-        return vector_research.process_query_v2(query_string, dictionary, inverse_index_freq, list_doc_weight)
+        return vector_research.process_query_v2(query_string, dictionary, posting_list, list_doc_weight)
     elif search_type == 'v' or search_type == "vector":
-        return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight)
+        return vector_research.process_query(query_string, dictionary, posting_list, list_doc_weight)
 
 def calc_queries():
     """
@@ -124,11 +124,11 @@ if __name__ == "__main__":
     with open(PATH_DICTIONARY, "r") as f:
         dictionary = json.load(f)
 
-    with open(PATH_INVERTED_INDEX_SIMPLE, "r") as f2:
-        inverse_index_simple = json.load(f2)
+    with open(PATH_SIMPLE_POSTING_LIST, "r") as f2:
+        simple_posting_list = json.load(f2)
 
-    with open(PATH_INVERTED_INDEX_FREQ, "r") as f3:
-        inverse_index_freq = json.load(f3)
+    with open(PATH_COMPLETE_POSTING_LIST, "r") as f3:
+        posting_list = json.load(f3)
 
     with open(PATH_LIST_DOC_WEIGHT, "r") as f4:
         list_doc_weight = json.load(f4)

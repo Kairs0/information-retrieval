@@ -1,14 +1,14 @@
+import sys
 import math
 import time
+from indexation.collection import Collection
 import numpy as np
 import matplotlib.pyplot as plot
 
 # Set indexation folder content at same level as current file
-import sys
 sys.path.insert(0, "../indexation")
-from collection import Collection
 
-PATH_COLLECTION = r'..\collection_data\cacm.all'
+PATH_COLLECTION = r'../collection_data/cacm.all'
 PATH_COMMON_WORDS = r'../collection_data/common_words'
 
 
