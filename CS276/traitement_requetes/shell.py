@@ -20,10 +20,14 @@ def print_usage():
 
 
 def research(type_search, query_string):
+    """
+    Basic search function, called with a search_type (or search model)
+    and a query (a string).
+    """
     if type_search == 'b' or type_search == "boolean":
-        return boolean_research.process_query(query_string, dictionary, inverse_index, doc_id_list)
+        return boolean_research.process_query(query_string, dictionary, posting_list, doc_id_list)
     if type_search == 'v' or type_search == "vector":
-        return vector_research.process_query(query_string, dictionary, inverse_index, list_doc_weight)
+        return vector_research.process_query(query_string, dictionary, posting_list, doc_weights)
 
 
 if __name__ == "__main__":
@@ -58,19 +62,16 @@ if __name__ == "__main__":
     shell_open = True
     print("Loading indexes...", end="")
 
-    with open(f'{PATH_FOLDER_JSONS}\dictionary.json', "r") as f:
+    with open(f'{PATH_FOLDER_JSONS}/dictionary.json', "r") as f:
         dictionary = json.load(f)
 
-    # with open(f'{PATH_FOLDER_JSONS}\inverse_index_simple.json', "r") as f2:
-    #     inverse_index_simple = json.load(f2)
+    with open(f'{PATH_FOLDER_JSONS}/posting_list_complete.json', "r") as f3:
+        posting_list = json.load(f3)
 
-    with open(f'{PATH_FOLDER_JSONS}\posting_list_complete.json', "r") as f3:
-        inverse_index = json.load(f3)
+    with open(f'{PATH_FOLDER_JSONS}/list_doc_weight.json', "r") as f4:
+        doc_weights = json.load(f4)
 
-    with open(f'{PATH_FOLDER_JSONS}\list_doc_weight.json', "r") as f4:
-        list_doc_weight = json.load(f4)
-
-    doc_id_list = list_doc_weight.keys()
+    doc_id_list = doc_weights.keys()
 
     print(" => Indexes loaded.")
 

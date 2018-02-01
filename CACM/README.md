@@ -14,5 +14,5 @@ python shell.py -m <b|v|v2> [-t]
 ```
 
 #### Arguments : 
--m --model      : research model chosen for the search. ['b','boolean', 'v', 'vector', 'v2', 'vector v2']
+-m --model      : research model chosen for the search. ['b','boolean', 'v', 'vector']
 -t              : enable the time record.

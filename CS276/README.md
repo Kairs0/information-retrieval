@@ -21,7 +21,7 @@ CS276
 ```
 
 ## Indexation
-Depuis le dossier indexation, executer le script mp_indexation_cs276.py
+Depuis le dossier indexation, executer le script main.py (BSBI implementation)
 
 ## Execution des requêtes
 
