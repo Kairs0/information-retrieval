@@ -8,6 +8,7 @@ STEMMER = nltk.stem.SnowballStemmer("english")
 with open(PATH_COMMON_WORDS) as COMMON_WORDS_FILE:
     COMMON_WORDS_LIST = list(map(STEMMER.stem, COMMON_WORDS_FILE.read().split("\n")))
 
+
 def calc_balanced_weight(number_occurrence_term_in_doc, number_docs, number_docs_with_term):
     if number_occurrence_term_in_doc == 0:
         return 0
@@ -15,6 +16,7 @@ def calc_balanced_weight(number_occurrence_term_in_doc, number_docs, number_docs
         log_freq = math.log(number_occurrence_term_in_doc, 10)
         term_inverse_frequency = math.log(number_docs/number_docs_with_term, 10)
         return round((1 + log_freq)*term_inverse_frequency, 10)
+
 
 def query_to_words(query):
     """

@@ -34,9 +34,13 @@ def research(search_type, query_string, number_doc_expected=3):
     if search_type == 'b' or search_type == "boolean":
         return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
     elif search_type == 'v2':
-        return vector_research.process_query_v2(query_string, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected)
+        return vector_research.process_query_v2(
+            query_string, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected
+        )
     elif search_type == 'v' or search_type == "vector":
-        return vector_research.process_query(query_string, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected)
+        return vector_research.process_query(
+            query_string, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected
+        )
 
 
 def calc_queries():
@@ -68,10 +72,10 @@ def calc_result():
     """
     Return the dict of the test queries' result.
     k, v = query_id, [(results)]
-    The differents results for a query form a list.
+    The different results for a query form a list.
     """
     with open(PATH_RESULT_LIST, "r") as file:
-        content = file.read()  #TODO Faire le parsing de ce fichier
+        content = file.read()
     raw_results = content.split("\n")
 
     results = {}
@@ -208,6 +212,5 @@ if __name__ == "__main__":
             print(research(SEARCH_TYPE, str_query))
 
             if RECORD_TIME:
-                stop = timeit.default_timer()                                       # stop time
-            if RECORD_TIME:
+                stop = timeit.default_timer()                                       # stop time:
                 print('Query time: ' + str(round(stop - start, 3) * 10e3) + ' ms')  # print time
