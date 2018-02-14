@@ -6,13 +6,12 @@ import boolean_research
 import vector_research
 import matplotlib.pyplot as plot
 
-PATH_COLLECTION = r'..\collection_data\cacm.all'
-PATH_DICTIONARY = r'..\fichiers_traitements\dictionary.json'
-PATH_INVERTED_INDEX_SIMPLE = r'..\fichiers_traitements\inverse_index_simple.json'
-PATH_INVERTED_INDEX_FREQ = r'..\fichiers_traitements\inverse_index_freq.json'
-PATH_LIST_DOC_WEIGHT = r'..\fichiers_traitements\list_doc_weight.json'
-PATH_QUERY_LIST = r'..\collection_data\query.text'
-PATH_RESULT_LIST = r'..\collection_data\qrels.text'
+PATH_COLLECTION = r'../collection_data/cacm.all'
+PATH_DICTIONARY = r'../fichiers_traitements/dictionary.json'
+PATH_COMPLETE_POSTING_LIST = r'../fichiers_traitements/posting_list.json'
+PATH_LIST_DOC_WEIGHT = r'../fichiers_traitements/list_doc_weight.json'
+PATH_QUERY_LIST = r'../collection_data/query.text'
+PATH_RESULT_LIST = r'../collection_data/qrels.text'
 
 
 def print_usage():
@@ -21,7 +20,7 @@ def print_usage():
     """
     print("usage: " + sys.argv[0] + " -m model | -t")
     print("Options and arguments:")
-    print("-m --model\t: research model. ['b','boolean', 'v', 'vector', 'v2', 'vector v2']")
+    print("-m --model\t: research model. ['b','boolean', 'v', 'vector']")
     print("-t\t\t: enable the time record.")
     print("-e --eval\t: run evalution.")
 
@@ -32,6 +31,7 @@ def research(search_type, query_string, number_doc_expected=3):
     and a query (a string).
     """
     if search_type == 'b' or search_type == "boolean":
+<<<<<<< HEAD
         return boolean_research.process_query(query_string, dictionary, inverse_index_simple, doc_id_list)
     elif search_type == 'v2':
         return vector_research.process_query_v2(
@@ -41,6 +41,11 @@ def research(search_type, query_string, number_doc_expected=3):
         return vector_research.process_query(
             query_string, dictionary, inverse_index_freq, list_doc_weight, number_doc_expected
         )
+=======
+        return boolean_research.process_query(query_string, dictionary, posting_list, doc_id_list)
+    elif search_type == 'v' or search_type == "vector":
+        return vector_research.process_query(query_string, dictionary, posting_list, doc_weights, number_doc_expected)
+>>>>>>> 4ca668019899c35dafeec3fefd774017835ead4d
 
 
 def calc_queries():
@@ -181,16 +186,13 @@ if __name__ == "__main__":
     with open(PATH_DICTIONARY, "r") as f:
         dictionary = json.load(f)
 
-    with open(PATH_INVERTED_INDEX_SIMPLE, "r") as f2:
-        inverse_index_simple = json.load(f2)
-
-    with open(PATH_INVERTED_INDEX_FREQ, "r") as f3:
-        inverse_index_freq = json.load(f3)
+    with open(PATH_COMPLETE_POSTING_LIST, "r") as f3:
+        posting_list = json.load(f3)
 
     with open(PATH_LIST_DOC_WEIGHT, "r") as f4:
-        list_doc_weight = json.load(f4)
+        doc_weights = json.load(f4)
 
-    doc_id_list = list_doc_weight.keys()
+    doc_id_list = doc_weights.keys()
 
     print(" => Indexes loaded.")
 

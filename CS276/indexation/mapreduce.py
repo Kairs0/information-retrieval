@@ -1,6 +1,12 @@
 """
+This module implements our custom MapReduce framework,
+we decided to stock both the index {doc: {term: frequency}}
+and the posting_list {term: {doc: frequency}}
+
+So we need two partitions of map function results and two 'reduce functions'. 
+
 Source : https://pymotw.com/2/multiprocessing/mapreduce.html
-Double reduce function
+Strongly changed
 """
 import collections
 import itertools
@@ -35,7 +41,8 @@ class MapDoubleReduce(object):
         self.pool = multiprocessing.Pool(num_workers)
 
     def partition_1(self, mapped_values):
-        """Organize the mapped values by their key.
+        """
+        Organize the mapped values by their key.
         Returns an unsorted sequence of tuples with a key and a sequence of values.
         """
         partitioned_data = collections.defaultdict(list)
@@ -44,7 +51,8 @@ class MapDoubleReduce(object):
         return partitioned_data.items()
 
     def partition_2(self, mapped_values):
-        """Organize the mapped values by their value.
+        """
+        Organize the mapped values by their value.
         Returns an unsorted sequence of tuples with a key and a sequence of values.
         """
         partitioned_data = collections.defaultdict(list)
@@ -53,7 +61,8 @@ class MapDoubleReduce(object):
         return partitioned_data.items()
 
     def __call__(self, inputs, chunksize=1):
-        """Process the inputs through the map and reduce functions given.
+        """
+        Process the inputs through the map and reduce functions given.
 
         inputs
           An iterable containing the input data to be processed.
