@@ -99,7 +99,25 @@ def evaluate(search_type):
             expected = results[i + 1]
 
             if search_type == "b" or search_type == "boolean":
-                result_request = research(search_type, query)
+                query_words = query.split(' ')
+                clean_words_query = []
+                for word in query_words:
+                    if word != ' ' and word != '':
+                        clean_words_query.append(word.replace(' ', '')
+                                                        .replace('.', '')
+                                                        .replace('?', '') \
+                                                        .replace('!', '') \
+                                                        .replace(',', '')\
+                                                        .replace(':', '')\
+                                                        .replace('(', '')\
+                                                        .replace(')', '')\
+                                                        .replace('\'', '')\
+                                                        .replace('[', '')\
+                                                        .replace(']', ''))
+
+                query_and = " AND ".join([word for word in clean_words_query if word != ''])
+
+                result_request = research(search_type, query_and)
             else:
                 result_request = research(search_type, query, 3)
 
