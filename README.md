@@ -1,3 +1,7 @@
-pip install -U nltk
+# A student project about information retrieval
 
-http://www.nltk.org/book/
+Built with the [NLTK library](http://www.nltk.org/book/)
+
+See report for further details and execution steps
+
+Silvestre Perret, Arnaud Convers
